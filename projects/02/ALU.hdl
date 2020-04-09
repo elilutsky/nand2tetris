@@ -44,32 +44,35 @@ CHIP ALU {
     PARTS:
     
 	// Process x
-	Mux16(a=x, 
-	      b[0]=false, b[1]=false, b[2]=false, b[3]=false, b[4]=false,
-	      b[5]=false, b[6]=false, b[7]=false, b[8]=false, b[9]=false,
-		  b[10]=false, b[11]=false, b[12]=false, b[13]=false, b[14]=false, b[15]=false,
-	      sel=zx, out=xOrZero);
+
+	Not16(in[0]=zx, in[1]=zx, in[2]=zx, in[3]=zx, in[4]=zx,
+	      in[5]=zx, in[6]=zx, in[7]=zx, in[8]=zx, in[9]=zx,
+		  in[10]=zx, in[11]=zx, in[12]=zx, in[13]=zx, in[14]=zx, in[15]=zx,
+	      out=keepX);
+	And16(a=x, b=keepX, out=xOrZero); // Similar to using Mux16 (sel=zx, a=x, b=0) but with less gates
 	Not16(in=xOrZero, out=xNeg);
 	Mux16(a=xOrZero, b=xNeg, sel=nx, out=xFinal);
 	
 	// Process y
-	Mux16(a=y,
-	      b[0]=false, b[1]=false, b[2]=false, b[3]=false, b[4]=false,
-	      b[5]=false, b[6]=false, b[7]=false, b[8]=false, b[9]=false,
-		  b[10]=false, b[11]=false, b[12]=false, b[13]=false, b[14]=false, b[15]=false,
-	      sel=zy, out=yOrZero);
+
+	Not16(in[0]=zy, in[1]=zy, in[2]=zy, in[3]=zy, in[4]=zy,
+	      in[5]=zy, in[6]=zy, in[7]=zy, in[8]=zy, in[9]=zy,
+		  in[10]=zy, in[11]=zy, in[12]=zy, in[13]=zy, in[14]=zy, in[15]=zy,
+	      out=keepY);
+	And16(a=y, b=keepY, out=yOrZero); // Similar to using Mux16 (sel=zy, a=y, b=0) but with less gates
 	Not16(in=yOrZero, out=yNeg);
 	Mux16(a=yOrZero, b=yNeg, sel=ny, out=yFinal);
 	
 	// Perform selected operation according to "f"
 	And16(a=xFinal, b=yFinal, out=andOp);
 	Add16(a=xFinal, b=yFinal, out=sumOp);
-	Mux16(a=andOp, b=sumOp, sel=f, out=preNegOutput);
+	Mux16(a=andOp, b=sumOp, sel=f, out=opResult);
 	
-	// Negate output according to "no" 
-	Not16(in=preNegOutput, out=negatedOutput);
-	Mux16(a=preNegOutput, b=negatedOutput, sel=no, out=out);
+	// Negate result according to "no" 
+	Not16(in=opResult, out=negOpResult);
+	Mux16(a=opResult, b=negOpResult, sel=no, out=out, out=tempOut, out[15]=ng);
 	
-	Not(in=zx, out=zr);
-	Not(in=zx, out=ng);
+	// Compute whether out == 0
+	Not16(in=tempOut, out=negOut);
+	And16Way(in=negOut, out=zr);
 }
