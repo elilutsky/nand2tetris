@@ -68,5 +68,8 @@ CHIP ALU {
 	
 	// Negate output according to "no" 
 	Not16(in=preNegOutput, out=negatedOutput);
-	Mux16(a=preNegOutput, b=negatedOutput, sel=no, out=output);
+	Mux16(a=preNegOutput, b=negatedOutput, sel=no, out=out);
+	
+	Not(in=zx, out=zr);
+	Not(in=zx, out=ng);
 }
