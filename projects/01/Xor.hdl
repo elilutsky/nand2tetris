@@ -14,11 +14,9 @@ CHIP Xor {
 
     PARTS:
     
-	// Xor(a, b) = (a and not b) or (not a or b)
-	Not(in=a, out=nota);
-	Not(in=b, out=notb);
-	And(a=a, b=notb, out=aNotB);
-	And(a=nota, b=b, out=notaB);
-	Or(a=aNotB, b=notaB, out=out);
-	
+    // Xor(a, b) = (a or b) and (not (a and b)), using 4 gates only
+    And(a=a, b=b, out=aAndB);
+    Not(in=aAndB, out=notAorNotB);
+    Or(a=a, b=b, out=aOrB); 
+    And(a=aOrB, b=notAorNotB, out=out);
 }
