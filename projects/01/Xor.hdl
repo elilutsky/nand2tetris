@@ -13,5 +13,10 @@ CHIP Xor {
     OUT out;
 
     PARTS:
-    // Put your code here:
+    
+    // Xor(a, b) = (a or b) and (not (a and b)), using 4 gates only
+    And(a=a, b=b, out=aAndB);
+    Not(in=aAndB, out=notAorNotB);
+    Or(a=a, b=b, out=aOrB); 
+    And(a=aOrB, b=notAorNotB, out=out);
 }
