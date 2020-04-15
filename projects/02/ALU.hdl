@@ -42,5 +42,39 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-   // Put you code here:
+    
+    // Process x
+    
+    Mux16(a=x,
+          b[0]=false, b[1]=false, b[2]=false, b[3]=false, b[4]=false,
+          b[5]=false, b[6]=false, b[7]=false, b[8]=false, b[9]=false,
+          b[10]=false, b[11]=false, b[12]=false, b[13]=false, b[14]=false, b[15]=false,
+          sel=zx, 
+          out=xOrZero);
+    Not16(in=xOrZero, out=xNeg);
+    Mux16(a=xOrZero, b=xNeg, sel=nx, out=xFinal);
+	
+    // Process y
+
+    Mux16(a=y,
+          b[0]=false, b[1]=false, b[2]=false, b[3]=false, b[4]=false,
+          b[5]=false, b[6]=false, b[7]=false, b[8]=false, b[9]=false,
+          b[10]=false, b[11]=false, b[12]=false, b[13]=false, b[14]=false, b[15]=false,
+          sel=zy, 
+          out=yOrZero);
+    Not16(in=yOrZero, out=yNeg);
+    Mux16(a=yOrZero, b=yNeg, sel=ny, out=yFinal);
+    
+    // Perform selected operation according to "f"
+    And16(a=xFinal, b=yFinal, out=andOp);
+    Add16(a=xFinal, b=yFinal, out=sumOp);
+    Mux16(a=andOp, b=sumOp, sel=f, out=opResult);
+    
+    // Negate result according to "no" 
+    Not16(in=opResult, out=negOpResult);
+    Mux16(a=opResult, b=negOpResult, sel=no, out=out, out=tempOut, out[15]=ng);
+    
+    // Compute whether out == 0
+    Or16Way(in=tempOut, out=outputOr);
+    Not(in=outputOr, out=zr);
 }
