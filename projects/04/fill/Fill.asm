@@ -11,4 +11,54 @@
 // "white" in every pixel;
 // the screen should remain fully clear as long as no key is pressed.
 
-// Put your code here.
+
+(LOOP)
+    @KBD 
+    D=M                   // read key stroke
+    
+    @NO_KEYSTROKE 
+    D;JEQ                 // no keystore, keep D=0
+
+    D=-1                  // D = 0xffff (an all "black" word)
+    
+(NO_KEYSTROKE)
+
+    @fillValue
+    M=D
+    
+    @currentIndex 
+    M=0
+
+(ITERATION)
+
+    @currentIndex
+    D=M
+    
+    @8192                 // screen size in words
+    D=D-A    
+    
+    @LOOP
+    D;JGE                 // if (currentIndex >= 16384) goto LOOP
+    
+    @SCREEN
+    D=A
+    
+    @currentIndex
+    D=D+M                 // D = SCREEN + currentIndex
+    
+    @currentAddress
+    M=D                   // currentAddress = D = SCREEN + currentIndex
+    
+    @fillValue
+    D=M
+    
+    @currentAddress
+    A=M
+    
+    M=D                   // *currentAddress = fillValue
+    
+    @currentIndex
+    M=M+1                 // currentIndex++
+    
+    @ITERATION
+    0;JMP
