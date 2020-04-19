@@ -38,7 +38,7 @@
     D=D-A    
     
     @LOOP
-    D;JGE                 // if (currentIndex >= 16384) goto LOOP
+    D;JGE                 // if (currentIndex >= 8192) goto LOOP
     
     @SCREEN
     D=A
