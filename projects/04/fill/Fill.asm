@@ -12,3 +12,55 @@
 // the screen should remain fully clear as long as no key is pressed.
 
 // Put your code here.
+
+(GETCLICK)
+	@KBD
+	D=M
+	
+	@NOKEY
+	D;JEQ
+	
+	D=-1
+	
+(NOKEY)
+
+	@color
+	M=D
+	
+	@i
+	M=0
+
+(LOOP)
+	
+	// if (index == 8192) goto GETCLICK
+	@i
+	D=M
+	@8192                 
+    D=D-A
+	@GETCLICK
+	D;JEQ
+	
+	// addr = SCREEN + index 
+	@SCREEN
+	D=A
+	@i
+	D=D+M
+	@addr
+	M=D
+	
+	// M[addr] = color
+	@color
+	D=M
+	@addr
+	A=M
+	M=D
+	
+	// i++; goto LOOP
+	@i
+	M=M+1
+	@LOOP
+	0;JMP
+
+(END)
+    @END
+    0;JMP 
