@@ -14,16 +14,14 @@
 // Put your code here.
 
 (GETCLICK)
+
+	// color = -1 if KBD else 0
 	@KBD
 	D=M
-	
 	@NOKEY
 	D;JEQ
-	
 	D=-1
-	
 (NOKEY)
-
 	@color
 	M=D
 	
@@ -36,7 +34,7 @@
 	@i
 	D=M
 	@8192                 
-    D=D-A
+	D=D-A
 	@GETCLICK
 	D;JEQ
 	
