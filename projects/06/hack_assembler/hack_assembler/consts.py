@@ -3,7 +3,7 @@ from lark import Lark
 
 A_INSTRUCTION_MAX_LITERAL_SIZE = 32767
 
-LABEL_REGEX = re.compile('\((?P<label_name>[A-Z_]+)\)')
+LABEL_REGEX = re.compile('\((?P<label_name>.+)\)')
 
 JGT = "JGT"
 JEQ = "JEQ"
@@ -65,7 +65,7 @@ JMP_TO_BINARY = {
 
 lexer = Lark(f"""
             instruction : A_PREFIX value | dest EQUAL comp | comp SEMICOLON jump
-            value: NUMBER | NAME
+            value: /(.+)/
             dest : register~1..3
             register : {SREGISTER} | {DREGISTER}
             sregister : A_REGISTER | M_REGISTER
@@ -112,6 +112,6 @@ lexer = Lark(f"""
             {JMP}: "{JMP}"
             
             %import common.NUMBER
-            %import common.CNAME -> NAME
+            %import common._STRING_INNER -> STRING
             """
              , start='instruction')

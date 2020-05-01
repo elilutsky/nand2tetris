@@ -1,7 +1,7 @@
 import pytest
 
-from hack_assembler.hack_assembler.instruction import parse_instruction
-from hack_assembler.hack_assembler.parser import SymbolTable
+from ..instruction import parse_instruction
+from ..parser import SymbolTable
 from parametrization import Parametrization
 
 
