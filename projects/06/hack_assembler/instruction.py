@@ -1,4 +1,4 @@
-from assembler.consts import *
+from consts import *
 
 
 def parse_instruction(line):

@@ -1,6 +1,6 @@
 import pytest
 
-from assembler.instruction import parse_instruction
+from instruction import parse_instruction
 from parametrization import Parametrization
 
 

@@ -1,5 +1,5 @@
-from assembler.exceptions import LineParseException
-from assembler.instruction import parse_instruction
+from exceptions import LineParseException
+from instruction import parse_instruction
 
 
 def parse_data(data):

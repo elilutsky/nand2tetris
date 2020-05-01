@@ -1,7 +1,7 @@
 import argparse
-from assembler import parser
-
 from pathlib import Path
+
+from parser import parse_data
 
 
 def assemble(f):
@@ -12,7 +12,7 @@ def assemble(f):
     if input_file.suffix != '.asm':
         raise Exception('Expected .asm file')
 
-    result = parser.parse_data(input_file.read_text())
+    result = parse_data(input_file.read_text())
     input_file.with_suffix('.hack').write_text(result)
 
 
