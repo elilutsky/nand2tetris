@@ -1,6 +1,7 @@
 import pytest
 
-from instruction import parse_instruction
+from hack_assembler.hack_assembler.instruction import parse_instruction
+from hack_assembler.hack_assembler.parser import SymbolTable
 from parametrization import Parametrization
 
 
@@ -26,7 +27,7 @@ from parametrization import Parametrization
 @Parametrization.case('C instruction - assignment', 'AMD=-1', '1110111010111000')
 @Parametrization.case('C instruction - assignment', 'D=D+M', '1111000010010000')
 def test_parse_instruction_valid_instruction(test_input, expected):
-    assert parse_instruction(test_input) == expected
+    assert parse_instruction(test_input, SymbolTable()) == expected
 
 
 @Parametrization.parameters('test_input')
@@ -44,4 +45,4 @@ def test_parse_instruction_valid_instruction(test_input, expected):
 @Parametrization.case('C instruction - assignment', 'M=D;JMP')
 def test_parse_instruction_invalid_instruction(test_input):
     with pytest.raises(Exception):
-        assert parse_instruction(test_input)
+        assert parse_instruction(test_input, SymbolTable())

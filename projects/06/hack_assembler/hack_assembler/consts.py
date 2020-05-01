@@ -1,7 +1,9 @@
+import re
 from lark import Lark
 
 A_INSTRUCTION_MAX_LITERAL_SIZE = 32767
 
+LABEL_REGEX = re.compile('\((?P<label_name>[A-Z_]+)\)')
 
 JGT = "JGT"
 JEQ = "JEQ"
@@ -29,7 +31,6 @@ DREGISTER_MINUS_SREGISTER = 'dregister_minus_sregister'
 SREGISTER_MINUS_DREGISTER = 'sregister_minus_dregister'
 DREGISTER_AND_SREGISTER = 'dregister_and_sregister'
 DREGISTER_OR_SREGISTER = 'dregister_or_sregister'
-
 
 COMP_TO_BINARY = {
     ZERO: '101010',
@@ -114,4 +115,3 @@ lexer = Lark(f"""
             %import common.CNAME -> NAME
             """
              , start='instruction')
-

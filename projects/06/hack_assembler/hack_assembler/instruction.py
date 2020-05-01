@@ -1,19 +1,29 @@
-from consts import *
+from .consts import *
 
 
-def parse_instruction(line):
+def parse_instruction(line, symbol_table):
     """
     Parses the given assembly line into a machine binary instruction. The returned string is a 16-bit machine binary.
     """
     parsed = lexer.parse(line)
     if hasattr(parsed.children[0], 'value') and parsed.children[0].value == '@':
-        return parse_a_instruction(parsed)
+        return parse_a_instruction(parsed, symbol_table)
     else:
         return parse_c_instruction(parsed)
 
 
-def parse_a_instruction(parsed):
+def parse_a_instruction(parsed, symbol_table):
     value = next(parsed.find_data('value')).children[0].value
+
+    if not value.isdecimal():
+        if value in symbol_table:
+            # Encountered label
+            value = symbol_table[value]
+        else:
+            # Encountered variable
+            symbol_table.add_variable(value)
+            value = symbol_table[value]
+
     if int(value) > A_INSTRUCTION_MAX_LITERAL_SIZE:
         raise Exception('A instruction max literal size exceeded')
     return '0' + f'{int(value):b}'.zfill(15)

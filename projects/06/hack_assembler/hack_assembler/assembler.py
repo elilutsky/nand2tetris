@@ -1,7 +1,5 @@
-import argparse
 from pathlib import Path
-
-from parser import parse_data
+from .parser import parse_data
 
 
 def assemble(f):
@@ -14,10 +12,3 @@ def assemble(f):
 
     result = parse_data(input_file.read_text())
     input_file.with_suffix('.hack').write_text(result)
-
-
-if __name__ == '__main__':
-    argsparser = argparse.ArgumentParser(description='Assembler for Hack language.')
-    argsparser.add_argument('file', metavar='FILE', help='path to the .asm file')
-    args = argsparser.parse_args()
-    assemble(args.file)
