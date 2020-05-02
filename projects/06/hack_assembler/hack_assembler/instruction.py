@@ -16,13 +16,10 @@ def parse_a_instruction(parsed, symbol_table):
     value = next(parsed.find_data('value')).children[0].value
 
     if not value.isdecimal():
-        if value in symbol_table:
-            # Encountered label
-            value = symbol_table[value]
-        else:
-            # Encountered variable
+        # Encountered variable
+        if value not in symbol_table:
             symbol_table.add_variable(value)
-            value = symbol_table[value]
+        value = symbol_table[value]
 
     if int(value) > A_INSTRUCTION_MAX_LITERAL_SIZE:
         raise Exception('A instruction max literal size exceeded')
