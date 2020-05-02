@@ -27,28 +27,27 @@ def parse_a_instruction(parsed, symbol_table):
 
 
 def parse_c_instruction(parsed):
+    comp = parse_comp_part(parsed)
     if any(parsed.find_data('jump')):
-        result = parse_jump_instruction(parsed)
+        jump_part = parse_jump_instruction(parsed)
+        result = comp + '000' + jump_part
     else:
-        result = parse_assign_instruction(parsed)
+        assign_part = parse_assign_instruction(parsed)
+        result = comp + assign_part + '000'
 
     return '111' + result
 
 
 def parse_jump_instruction(parsed):
-    comp = parse_comp_part(parsed)
     jmp = next(parsed.find_data('jump'))
-    return comp + '000' + JMP_TO_BINARY[jmp.children[0].value]
+    return JMP_TO_BINARY[jmp.children[0].value]
 
 
 def parse_assign_instruction(parsed):
-    comp = parse_comp_part(parsed)
     dest = next(parsed.find_data('dest'))
-    return comp + \
-           ('1' if any(dest.scan_values(lambda x: x == 'A')) else '0') + \
+    return ('1' if any(dest.scan_values(lambda x: x == 'A')) else '0') + \
            ('1' if any(dest.scan_values(lambda x: x == 'D')) else '0') + \
-           ('1' if any(dest.scan_values(lambda x: x == 'M')) else '0') \
-           + '000'
+           ('1' if any(dest.scan_values(lambda x: x == 'M')) else '0')
 
 
 def parse_comp_part(parsed):
