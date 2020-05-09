@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from ..parser import parse_data
+from ..assembler import parse_data
 
 
 def test_parser():
