@@ -1,7 +1,7 @@
 import pytest
 
 from ..instruction import parse_instruction
-from ..parser import SymbolTable
+from ..symbol_table import SymbolTable
 from parametrization import Parametrization
 
 
