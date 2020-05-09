@@ -21,8 +21,8 @@ def parse_data(data):
     """
     result = ''
     code = filter_irrelevant_lines(data.splitlines())
-    symbol_table, clean_code = SymbolTable.build_symbol_table(code)
-    for line_num, line in enumerate(clean_code):
+    symbol_table = SymbolTable.build_symbol_table(code)
+    for line_num, line in enumerate(code):
         try:
             result += parse_instruction(line, symbol_table) + '\n'
         except Exception as e:

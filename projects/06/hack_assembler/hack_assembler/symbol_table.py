@@ -33,12 +33,10 @@ class SymbolTable(object):
     def build_symbol_table(code):
         symbol_table = SymbolTable()
         line_num = 0
-        clean_code = []
         for line in code:
             label_match = LABEL_REGEX.match(line)
             if label_match:
                 symbol_table.add_label(label_match['label_name'], line_num)
             else:
                 line_num += 1
-                clean_code.append(line)
-        return symbol_table, clean_code
+        return symbol_table
