@@ -39,5 +39,46 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+    
+    ARegister(in=aRegisterInput, load=shouldLoadA,    out=aRegisterOut, out[0..14]=addressM);
+    DRegister(in=aluOut,         load=shouldLoadD,    out=dRegisterOut);
+    PC(in=aRegisterOut, load=takeJump, inc=true, reset=reset, out[0..14]=pc);
+    
+    ALU(x=dRegisterOut, y=alu2ndInput,
+        zx=instruction[11], nx=instruction[10], zy=instruction[9], 
+        ny=instruction[8], f=instruction[7], no=instruction[6], 
+        out=aluOut, out=outM, zr=isZeroAluOut, ng=isNegativeAluOut);
+    
+    // For A-instructions (msb==0), select the instruction value
+    // For C-instructions (msb==1), select the ALU output
+    Mux16(a=instruction, b=aluOut, sel=instruction[15], out=aRegisterInput); 
+    
+    // Load the A-Register for A instructions and C instructions that write to A
+    Not(in=instruction[15], out=isAInstruction);
+    Or(a=isAInstruction, b=instruction[5], out=shouldLoadA);
+    
+    // Load D-register in C instructions, when requested by the instruction
+    And(a=instruction[15], b=instruction[4], out=shouldLoadD);
+    
+    // the "a" bit selects between the A register and memory M. 
+    Mux16(a=aRegisterOut, b=inM, sel=instruction[12], out=alu2ndInput);
+    
+    // set writeM for C instructions that request so
+    And(a=instruction[15], b=instruction[3], out=writeM);
+    
+    // Determine whether should take the jump
+    Or(a=isZeroAluOut, b=isNegativeAluOut, out=zeroOrNeg);
+    Not(in=zeroOrNeg, out=isPositiveAluOut);
+    
+    And(a=isZeroAluOut, b=instruction[1], out=zeroBranch);
+    And(a=isNegativeAluOut, b=instruction[2], out=negativeBranch);
+    And(a=isPositiveAluOut, b=instruction[0], out=positiveBranch);
+    
+    Or8Way(in[0]=zeroBranch, in[1]=negativeBranch, in[2]=positiveBranch,
+           in[3]=false, in[4]=false, in[5]=false, in[6]=false, in[7]=false,
+           out=shouldBranch);
+           
+    // Only relevant for C instructions
+    And(a=shouldBranch, b=instruction[15], out=takeJump);
+    
 }
