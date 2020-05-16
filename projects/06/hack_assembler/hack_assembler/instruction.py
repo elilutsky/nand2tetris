@@ -1,11 +1,11 @@
-from .consts import *
+import re
 
 
 def create_instruction(cmd, symbol_table):
     for instruction_type in Instruction.__subclasses__():
         if instruction_type.is_of_type(cmd):
             return instruction_type(cmd, symbol_table)
-    return Instruction(cmd, symbol_table)
+    raise Exception('Invalid instruction')
 
 
 class Instruction(object):
@@ -25,7 +25,7 @@ class Instruction(object):
 
 
 class LabelInstruction(Instruction):
-    LABEL_REGEX = re.compile('\((?P<label_name>.+)\)')
+    LABEL_REGEX = re.compile('^\((?P<label_name>.+)\)$')
 
     @staticmethod
     def is_of_type(cmd):
@@ -40,7 +40,7 @@ class LabelInstruction(Instruction):
 
 
 class AInstruction(Instruction):
-    A_REGEX = re.compile('@(?P<value>[^@]+)')
+    A_REGEX = re.compile('^@(?P<value>[^@]+)$')
     A_INSTRUCTION_MAX_LITERAL_SIZE = 32767
 
     def __init__(self, cmd, symbol_table):
@@ -64,39 +64,83 @@ class AInstruction(Instruction):
         return value
 
 
-def parse_instruction(line, symbol_table):
-    """
-    Parses the given assembly line into a machine binary instruction. The returned string is a 16-bit machine binary.
-    """
-    parsed = lexer.parse(line)
-    return parse_c_instruction(parsed)
+class CInstruction(Instruction):
+    C_REGEX = re.compile('^((?P<dest>[AMD]{1,3})=)?(?P<comp>[^=;]+)(;(?P<jump>\w+))?$')
+    JMP_TO_BINARY = {
+        'JGT': '001',
+        'JEQ': '010',
+        'JGE': '011',
+        'JLT': '100',
+        'JNE': '101',
+        'JLE': '110',
+        'JMP': '111',
+    }
 
+    COMP_TO_BINARY = {
+        '0': '101010',
+        '1': '111111',
+        '-1': '111010',
+        'D': '001100',
+        'M': '110000',
+        'A': '110000',
+        '!D': '001101',
+        '!M': '110001',
+        '!A': '110001',
+        '-D': '001111',
+        '-A': '110011',
+        '-M': '110011',
+        'D+1': '011111',
+        'A+1': '110111',
+        'M+1': '110111',
+        'D-1': '001110',
+        'A-1': '110010',
+        'M-1': '110010',
+        'D+A': '000010',
+        'D+M': '000010',
+        'D-A': '010011',
+        'D-M': '010011',
+        'A-D': '000111',
+        'M-D': '000111',
+        'D&A': '000000',
+        'D&M': '000000',
+        'D|A': '010101',
+        'D|M': '010101',
+    }
 
-def parse_c_instruction(parsed):
-    comp = parse_comp_part(parsed)
-    if any(parsed.find_data('jump')):
-        jump_part = parse_jump_instruction(parsed)
-        result = comp + '000' + jump_part
-    else:
-        assign_part = parse_assign_instruction(parsed)
-        result = comp + assign_part + '000'
+    @staticmethod
+    def is_of_type(cmd):
+        m = CInstruction.C_REGEX.match(cmd)
+        return bool(m) and bool(m.groupdict()['jump'] or m.groupdict()['dest'])
 
-    return '111' + result
+    @property
+    def comp_part(self):
+        return CInstruction.C_REGEX.match(self.cmd)['comp']
 
+    @property
+    def dest_part(self):
+        return CInstruction.C_REGEX.match(self.cmd)['dest']
 
-def parse_jump_instruction(parsed):
-    jmp = next(parsed.find_data('jump'))
-    return JMP_TO_BINARY[jmp.children[0].value]
+    @property
+    def jump_part(self):
+        return CInstruction.C_REGEX.match(self.cmd)['jump']
 
+    def to_binary(self):
+        return '111' + self._parse_comp() + self._parse_dest() + self._parse_jump()
 
-def parse_assign_instruction(parsed):
-    dest = next(parsed.find_data('dest'))
-    return ('1' if any(dest.scan_values(lambda x: x == 'A')) else '0') + \
-           ('1' if any(dest.scan_values(lambda x: x == 'D')) else '0') + \
-           ('1' if any(dest.scan_values(lambda x: x == 'M')) else '0')
+    def _parse_comp(self):
+        a_value = '1' if 'M' in self.comp_part else '0'
+        return a_value + CInstruction.COMP_TO_BINARY[self.comp_part]
 
+    def _parse_jump(self):
+        if self.jump_part:
+            return CInstruction.JMP_TO_BINARY[self.jump_part]
+        else:
+            return '000'
 
-def parse_comp_part(parsed):
-    comp_data = next(parsed.find_data('comp'))
-    a_value = '1' if any(comp_data.scan_values(lambda x: x == 'M')) else '0'
-    return a_value + COMP_TO_BINARY[comp_data.children[0].data]
+    def _parse_dest(self):
+        if self.dest_part:
+            return ('1' if 'A' in self.dest_part else '0') + \
+                   ('1' if 'D' in self.dest_part else '0') + \
+                   ('1' if 'M' in self.dest_part else '0')
+        else:
+            return '000'

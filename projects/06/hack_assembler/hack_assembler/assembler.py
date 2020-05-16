@@ -1,4 +1,4 @@
-from .instruction import parse_instruction, LabelInstruction, AInstruction
+from .instruction import LabelInstruction
 from .symbol_table import SymbolTable
 from .utils import code_iterator
 
@@ -10,11 +10,8 @@ def parse_data(code):
     result = ''
     symbol_table = SymbolTable.build_symbol_table(code)
     for instruction in code_iterator(code, symbol_table):
-        if isinstance(instruction, AInstruction):
-            result += instruction.to_binary() + '\n'
-            continue
         if not isinstance(instruction, LabelInstruction):
-            result += parse_instruction(instruction.cmd, symbol_table) + '\n'
+            result += instruction.to_binary() + '\n'
     return result
 
 

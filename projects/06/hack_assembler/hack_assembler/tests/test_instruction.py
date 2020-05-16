@@ -1,13 +1,27 @@
 import pytest
 
-from ..instruction import parse_instruction
 from ..symbol_table import SymbolTable
+from ..instruction import AInstruction, CInstruction
 from parametrization import Parametrization
 
 
 @Parametrization.parameters('test_input', 'expected')
 @Parametrization.case('A instruction', '@17', '0000000000010001')
 @Parametrization.case('A instruction', '@42', '0000000000101010')
+def test_a_instruction_valid_instruction(test_input, expected):
+    assert AInstruction(test_input, SymbolTable()).to_binary() == expected
+
+
+@Parametrization.parameters('test_input')
+@Parametrization.case('A instruction - large literal', '@32768')
+@Parametrization.case('A instruction - large literal', '@999999')
+@Parametrization.case('A instruction - no literal', '@')
+def test_a_instruction_invalid_instruction(test_input):
+    with pytest.raises(Exception):
+        AInstruction(test_input, SymbolTable()).to_binary()
+
+
+@Parametrization.parameters('test_input', 'expected')
 @Parametrization.case('C instruction - branching', '0;JMP', '1110101010000111')
 @Parametrization.case('C instruction - branching', 'M;JEQ', '1111110000000010')
 @Parametrization.case('C instruction - branching', '-1;JLT', '1110111010000100')
@@ -26,14 +40,12 @@ from parametrization import Parametrization
 @Parametrization.case('C instruction - assignment', 'D=0', '1110101010010000')
 @Parametrization.case('C instruction - assignment', 'AMD=-1', '1110111010111000')
 @Parametrization.case('C instruction - assignment', 'D=D+M', '1111000010010000')
-def test_parse_instruction_valid_instruction(test_input, expected):
-    assert parse_instruction(test_input, SymbolTable()) == expected
+@Parametrization.case('C instruction - assignment and jump', 'D=D+M;JGT', '1111000010010001')
+def test_c_instruction_valid_instruction(test_input, expected):
+    assert CInstruction(test_input, SymbolTable()).to_binary() == expected
 
 
 @Parametrization.parameters('test_input')
-@Parametrization.case('A instruction - large literal', '@32768')
-@Parametrization.case('A instruction - large literal', '@999999')
-@Parametrization.case('A instruction - no literal', '@')
 @Parametrization.case('C instruction - branching - invalid jump', '-1;GGT')
 @Parametrization.case('C instruction - branching - invalid comp', 'MD;JMP')
 @Parametrization.case('C instruction - assignment - invalid dest', '-1=M')
@@ -42,7 +54,6 @@ def test_parse_instruction_valid_instruction(test_input, expected):
 @Parametrization.case('C instruction - assignment - invalid comp', 'A=JMP')
 @Parametrization.case('C instruction - assignment - invalid comp', 'M=M|D')
 @Parametrization.case('C instruction - assignment - invalid comp', 'A=M+M')
-@Parametrization.case('C instruction - assignment', 'M=D;JMP')
-def test_parse_instruction_invalid_instruction(test_input):
+def test_c_instruction_invalid_instruction(test_input):
     with pytest.raises(Exception):
-        assert parse_instruction(test_input, SymbolTable())
+        CInstruction(test_input, SymbolTable()).to_binary()
