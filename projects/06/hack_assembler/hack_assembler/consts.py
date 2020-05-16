@@ -1,10 +1,6 @@
 import re
 from lark import Lark
 
-A_INSTRUCTION_MAX_LITERAL_SIZE = 32767
-
-LABEL_REGEX = re.compile('\((?P<label_name>.+)\)')
-
 JGT = "JGT"
 JEQ = "JEQ"
 JGE = "JGE"

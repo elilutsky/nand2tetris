@@ -1,38 +1,67 @@
 from .consts import *
 
 
-def create_instruction(cmd):
-    for instruction_type in [LabelInstruction]:
+def create_instruction(cmd, symbol_table):
+    for instruction_type in Instruction.__subclasses__():
         if instruction_type.is_of_type(cmd):
-            return instruction_type(cmd)
-    return Instruction(cmd)
+            return instruction_type(cmd, symbol_table)
+    return Instruction(cmd, symbol_table)
 
 
 class Instruction(object):
-    def __init__(self, cmd):
+    def __init__(self, cmd, symbol_table):
         self.cmd = cmd
-
-    def to_binary(self):
-        raise NotImplementedError()
+        self.symbol_table = symbol_table
 
     @staticmethod
     def is_of_type(cmd):
+        """
+        Returns True if the given `cmd` is of the instruction type.
+        """
+        raise NotImplementedError()
+
+    def to_binary(self):
         raise NotImplementedError()
 
 
 class LabelInstruction(Instruction):
-    LABEL_REGEX = re.compile('((?P<label_name>.+))')
+    LABEL_REGEX = re.compile('\((?P<label_name>.+)\)')
+
+    @staticmethod
+    def is_of_type(cmd):
+        return bool(LabelInstruction.LABEL_REGEX.match(cmd))
 
     def to_binary(self):
         raise Exception('Label instructions do not convert to binary')
 
-    @staticmethod
-    def is_of_type(cmd):
-        return LABEL_REGEX.match(cmd)
-
     @property
     def variable_name(self):
-        return LABEL_REGEX.match(self.cmd)['label_name']
+        return LabelInstruction.LABEL_REGEX.match(self.cmd)['label_name']
+
+
+class AInstruction(Instruction):
+    A_REGEX = re.compile('@(?P<value>[^@]+)')
+    A_INSTRUCTION_MAX_LITERAL_SIZE = 32767
+
+    def __init__(self, cmd, symbol_table):
+        super().__init__(cmd, symbol_table)
+
+    @staticmethod
+    def is_of_type(cmd):
+        return bool(AInstruction.A_REGEX.match(cmd))
+
+    def to_binary(self):
+        if int(self.get_value()) > AInstruction.A_INSTRUCTION_MAX_LITERAL_SIZE:
+            raise Exception('A instruction max literal size exceeded')
+        return '0' + f'{int(self.get_value()):b}'.zfill(15)
+
+    def get_value(self):
+        value = AInstruction.A_REGEX.match(self.cmd)['value']
+        if not value.isdecimal():
+            if value not in self.symbol_table:
+                self.symbol_table.add_variable(value)
+            value = self.symbol_table[value]
+        return value
 
 
 def parse_instruction(line, symbol_table):
@@ -40,24 +69,7 @@ def parse_instruction(line, symbol_table):
     Parses the given assembly line into a machine binary instruction. The returned string is a 16-bit machine binary.
     """
     parsed = lexer.parse(line)
-    if hasattr(parsed.children[0], 'value') and parsed.children[0].value == '@':
-        return parse_a_instruction(parsed, symbol_table)
-    else:
-        return parse_c_instruction(parsed)
-
-
-def parse_a_instruction(parsed, symbol_table):
-    value = next(parsed.find_data('value')).children[0].value
-
-    if not value.isdecimal():
-        # Encountered variable
-        if value not in symbol_table:
-            symbol_table.add_variable(value)
-        value = symbol_table[value]
-
-    if int(value) > A_INSTRUCTION_MAX_LITERAL_SIZE:
-        raise Exception('A instruction max literal size exceeded')
-    return '0' + f'{int(value):b}'.zfill(15)
+    return parse_c_instruction(parsed)
 
 
 def parse_c_instruction(parsed):
