@@ -1,4 +1,5 @@
 from .consts import LABEL_REGEX
+from .instruction import LabelInstruction
 from .utils import code_iterator
 
 
@@ -34,10 +35,9 @@ class SymbolTable(object):
     def build_symbol_table(code):
         symbol_table = SymbolTable()
         line_num = 0
-        for line in code_iterator(code):
-            label_match = LABEL_REGEX.match(line)
-            if label_match:
-                symbol_table.add_label(label_match['label_name'], line_num)
+        for instruction in code_iterator(code):
+            if isinstance(instruction, LabelInstruction):
+                symbol_table.add_label(instruction.variable_name, line_num)
             else:
                 line_num += 1
         return symbol_table

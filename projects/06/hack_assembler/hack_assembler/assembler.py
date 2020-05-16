@@ -1,4 +1,4 @@
-from .instruction import parse_instruction, LABEL_REGEX
+from .instruction import parse_instruction, LabelInstruction
 from .symbol_table import SymbolTable
 from .utils import code_iterator
 
@@ -9,10 +9,9 @@ def parse_data(code):
     """
     result = ''
     symbol_table = SymbolTable.build_symbol_table(code)
-    for line in code_iterator(code):
-        label_match = LABEL_REGEX.match(line)
-        if not label_match:
-            result += parse_instruction(line, symbol_table) + '\n'
+    for instruction in code_iterator(code):
+        if not isinstance(instruction, LabelInstruction):
+            result += parse_instruction(instruction.cmd, symbol_table) + '\n'
     return result
 
 

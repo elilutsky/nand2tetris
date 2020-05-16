@@ -1,6 +1,40 @@
 from .consts import *
 
 
+def create_instruction(cmd):
+    for instruction_type in [LabelInstruction]:
+        if instruction_type.is_of_type(cmd):
+            return instruction_type(cmd)
+    return Instruction(cmd)
+
+
+class Instruction(object):
+    def __init__(self, cmd):
+        self.cmd = cmd
+
+    def to_binary(self):
+        raise NotImplementedError()
+
+    @staticmethod
+    def is_of_type(cmd):
+        raise NotImplementedError()
+
+
+class LabelInstruction(Instruction):
+    LABEL_REGEX = re.compile('((?P<label_name>.+))')
+
+    def to_binary(self):
+        raise Exception('Label instructions do not convert to binary')
+
+    @staticmethod
+    def is_of_type(cmd):
+        return LABEL_REGEX.match(cmd)
+
+    @property
+    def variable_name(self):
+        return LABEL_REGEX.match(self.cmd)['label_name']
+
+
 def parse_instruction(line, symbol_table):
     """
     Parses the given assembly line into a machine binary instruction. The returned string is a 16-bit machine binary.
