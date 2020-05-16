@@ -1,32 +1,18 @@
-from .exceptions import LineParseException
-from .instruction import parse_instruction
-from .consts import LABEL_REGEX
+from .instruction import parse_instruction, LABEL_REGEX
 from .symbol_table import SymbolTable
+from .utils import code_iterator
 
 
-def filter_irrelevant_lines(data_lines):
-    result = []
-    for line in data_lines:
-        if '//' in line:
-            result.append(line[:line.index('//')])
-        else:
-            result.append(line)
-    result = map(str.strip, result)
-    return list(filter(None, result))
-
-
-def parse_data(data):
+def parse_data(code):
     """
     Converts the given assembly string to machine binary code.
     """
     result = ''
-    code = filter_irrelevant_lines(data.splitlines())
     symbol_table = SymbolTable.build_symbol_table(code)
-    for line_num, line in enumerate(code):
-        try:
+    for line in code_iterator(code):
+        label_match = LABEL_REGEX.match(line)
+        if not label_match:
             result += parse_instruction(line, symbol_table) + '\n'
-        except Exception as e:
-            raise LineParseException(line, line_num, str(e))
     return result
 
 
