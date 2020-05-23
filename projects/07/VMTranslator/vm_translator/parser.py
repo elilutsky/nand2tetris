@@ -6,6 +6,13 @@ Command = namedtuple('Command', ['command', 'command_type'])
 
 class SegmentType(Enum):
     CONSTANT = 'constant'
+    LOCAL = 'local'
+    ARGUMENT = 'argument'
+    THIS = 'this'
+    THAT = 'that'
+    STATIC = 'static'
+    POINTER = 'pointer'
+    TEMP = 'temp'
 
 
 class CommandType(Enum):
