@@ -14,8 +14,16 @@ TESTS_BASE_DIR = Path(__file__).parent
 @Parametrization.case('pop and push operations for the pointer segment type', 'PointerTest')
 @Parametrization.case('static segment push and pop operations', 'StaticTest')
 def test_translator(test_subject):
-    input_ = Path(f'{TESTS_BASE_DIR}/test_files/{test_subject}.vm').read_text()
-    expected = Path(f'{TESTS_BASE_DIR}/test_files/{test_subject}.expected').read_text()
 
-    t = Translator(input_, test_subject)
-    assert t.translate_data() == expected
+    input_ = f'{TESTS_BASE_DIR}/test_files/{test_subject}.vm'
+    temp = f'{TESTS_BASE_DIR}/test_files/{test_subject}.out'
+
+    with open(input_, 'r') as input_file:
+        with open(temp, 'w') as output_file:
+
+            t = Translator(input_file, output_file, test_subject)
+            t.translate_data()
+
+    expected_content = Path(f'{TESTS_BASE_DIR}/test_files/{test_subject}.expected').read_text()
+    actual_content = Path(temp).read_text()
+    assert actual_content == expected_content

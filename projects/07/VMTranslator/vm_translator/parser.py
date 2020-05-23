@@ -64,10 +64,11 @@ class VMCommand(object):
         return self._command_str.split()[2]
 
 
-def filter_irrelevant_lines(code):
-    return filter(None, filter(lambda x: not x.startswith('//'), code))
+def parse_code(input_code_file):
+    for line in input_code_file:
 
+        # skip emtpy lines and comments
+        if len(line.split()) == 0 or line.split()[0] == '//':
+            continue
 
-def parse_code(code):
-    for line in filter_irrelevant_lines(code.splitlines()):
         yield VMCommand(line)

@@ -7,31 +7,36 @@ def translate(f):
     """
     Translate the given `.vm` file `f` to a Hack file. The result will be saved in `f.asm`
     """
-    input_file = Path(f)
-    if input_file.suffix != '.vm':
+    input_file_path = Path(f)
+    if input_file_path.suffix != '.vm':
         raise Exception('Expected .vm file')
 
-    translator = Translator(input_file.read_text(), input_file.stem)
-    input_file.with_suffix('.asm').write_text(translator.translate_data())
+    with open(f, 'r') as input_file:
+        with open(input_file_path.with_suffix('.asm'), 'w') as output_file:
+            translator = Translator(input_file, output_file, input_file_path.stem)
+            translator.translate_data()
 
 
 class Translator(object):
-    def __init__(self, vm_code, vm_file_name):
+    def __init__(self, vm_code_file, output_asm_file, vm_file_name):
         self._current_code = []
-        self._vm_code = vm_code
+        self._vm_code_file = vm_code_file
+        self._output_asm_file = output_asm_file
         self._command_counter = 0
         self._vm_file_name = vm_file_name
 
     def translate_data(self):
-        for vm_command in parse_code(self._vm_code):
+        for vm_command in parse_code(self._vm_code_file):
             if vm_command.command_type == CommandType.ARITHMETIC:
                 self._handle_arithmetic(vm_command)
             elif vm_command.command_type == CommandType.PUSH:
                 self._handle_push(vm_command)
             elif vm_command.command_type == CommandType.POP:
                 self._handle_pop(vm_command)
+
             self._command_counter += 1
-        return '\n'.join(self._current_code)
+            self._output_asm_file.write('\n'.join(self._current_code) + '\n')
+            self._current_code = []
 
     def _handle_push(self, vm_command):
         segment_type = vm_command.arg1
