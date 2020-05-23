@@ -46,6 +46,8 @@ class Translator(object):
         elif vm_command.command == Commands.OR:
             self._handle_binary('|')
 
+        # TODO: add eq, lt ...
+
     def _handle_unary(self, op):
         self._decrease_sp()
         self._load_from_stack('D')
@@ -70,6 +72,7 @@ class Translator(object):
         self._add_c_command(dest=dest, comp='M')
 
     def _push_to_stack(self, source):
+        assert source.upper() not in ['A', 'M'], 'pushing to stack overrides A'
         self._load_sp()
         self._add_c_command(dest='M', comp=source)
         self._increase_sp()
@@ -90,8 +93,10 @@ class Translator(object):
         self._current_code.append(f'@{param}')
 
     def _add_c_command(self, dest=None, comp=None, jump=None):
-        if not comp:
-            raise Exception('Missing `comp` argument')
+        assert comp, 'Missing `comp` argument'
+
+        assert not (dest and jump), 'function does not expect both dest and jump parameters'
+
         if dest:
             self._current_code.append(f'{dest}={comp}')
         elif jump:

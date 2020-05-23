@@ -20,6 +20,7 @@ class Commands(Enum):
     NEG = Command('neg', CommandType.ARITHMETIC)
     EQ = Command('eg', CommandType.ARITHMETIC)
     GT = Command('gt', CommandType.ARITHMETIC)
+    LT = Command('lt', CommandType.ARITHMETIC)
     AND = Command('and', CommandType.ARITHMETIC)
     OR = Command('or', CommandType.ARITHMETIC)
     NOT = Command('not', CommandType.ARITHMETIC)
