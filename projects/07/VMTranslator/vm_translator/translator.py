@@ -19,6 +19,7 @@ class Translator(object):
     def __init__(self, vm_code):
         self._current_code = []
         self._vm_code = vm_code
+        self._command_counter = 0
 
     def translate_data(self):
         for vm_command in parse_code(self._vm_code):
@@ -26,6 +27,7 @@ class Translator(object):
                 self._handle_arithmetic(vm_command)
             elif vm_command.command_type == CommandType.PUSH:
                 self._handle_push(vm_command)
+            self._command_counter += 1
         return '\n'.join(self._current_code)
 
     def _handle_push(self, vm_command):
@@ -45,8 +47,14 @@ class Translator(object):
             self._handle_binary('&')
         elif vm_command.command == Commands.OR:
             self._handle_binary('|')
-
-        # TODO: add eq, lt ...
+        elif vm_command.command == Commands.LT:
+            self._handle_comparison('JLT')
+        elif vm_command.command == Commands.EQ:
+            self._handle_comparison('JEQ')
+        elif vm_command.command == Commands.GT:
+            self._handle_comparison('JGT')
+        else:
+            raise Exception(f'Unexpected arithmetic command: {vm_command.command}')
 
     def _handle_unary(self, op):
         self._decrease_sp()
@@ -61,6 +69,33 @@ class Translator(object):
         self._load_from_stack('A')
         self._add_c_command(dest='D', comp=f'D{op}A')
         self._push_to_stack('D')
+
+    def _handle_comparison(self, branch_condition):
+        true_label = f'_LOGICAL_SET_TRUE_{self._command_counter}'
+        end_label = f'_LOGICAL_END_{self._command_counter}'
+
+        self._decrease_sp()
+        self._load_from_stack('D')
+        self._decrease_sp()
+        self._load_from_stack('A')
+        self._add_c_command(dest='D', comp=f'D-A')
+        self._add_a_command(true_label)
+        self._add_c_command(comp='D', jump=branch_condition)
+
+        # set result to false (represented as 0)
+        self._add_c_command(dest='D', comp='0')
+        self._add_a_command(end_label)
+        self._add_c_command(comp='0', jump='JMP')
+
+        # set result to true (represented as -1)
+        self._add_label_command(true_label)
+        self._add_c_command(dest='D', comp='-1')
+
+        self._add_label_command(end_label)
+        self._push_to_stack('D')
+
+    def _add_label_command(self, label):
+        self._current_code.append(f'({label})')
 
     def _push_constant(self, value):
         self._add_a_command(value)
