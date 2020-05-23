@@ -18,7 +18,7 @@ class Commands(Enum):
     ADD = Command('add', CommandType.ARITHMETIC)
     SUB = Command('sub', CommandType.ARITHMETIC)
     NEG = Command('neg', CommandType.ARITHMETIC)
-    EQ = Command('eg', CommandType.ARITHMETIC)
+    EQ = Command('eq', CommandType.ARITHMETIC)
     GT = Command('gt', CommandType.ARITHMETIC)
     LT = Command('lt', CommandType.ARITHMETIC)
     AND = Command('and', CommandType.ARITHMETIC)

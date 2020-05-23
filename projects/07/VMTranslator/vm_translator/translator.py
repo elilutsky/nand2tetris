@@ -67,7 +67,12 @@ class Translator(object):
         self._load_from_stack('D')
         self._decrease_sp()
         self._load_from_stack('A')
-        self._add_c_command(dest='D', comp=f'D{op}A')
+        if op == '-':
+            # The first parameter is pushed first
+            self._add_c_command(dest='D', comp=f'A-D')
+        else:
+            # Order does not matter
+            self._add_c_command(dest='D', comp=f'D{op}A')
         self._push_to_stack('D')
 
     def _handle_comparison(self, branch_condition):
@@ -78,7 +83,7 @@ class Translator(object):
         self._load_from_stack('D')
         self._decrease_sp()
         self._load_from_stack('A')
-        self._add_c_command(dest='D', comp=f'D-A')
+        self._add_c_command(dest='D', comp=f'A-D')
         self._add_a_command(true_label)
         self._add_c_command(comp='D', jump=branch_condition)
 
