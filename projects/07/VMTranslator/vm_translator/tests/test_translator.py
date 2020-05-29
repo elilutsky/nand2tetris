@@ -10,10 +10,11 @@ TESTS_BASE_DIR = Path(__file__).parent
 @Parametrization.parameters('test_subject')
 @Parametrization.case('Simple const push and arithmetic action', 'SimpleAdd')
 @Parametrization.case('Arithmetic and logical stack operations', 'StackTest')
-@Parametrization.case('pop and push operations for most segment types', 'BasicTest')
-@Parametrization.case('pop and push operations for the pointer segment type', 'PointerTest')
-@Parametrization.case('static segment push and pop operations', 'StaticTest')
-@Parametrization.case('simple label and ifgoto operation', 'SimpleLoop')
+@Parametrization.case('Pop and push operations for most segment types', 'BasicTest')
+@Parametrization.case('Pop and push operations for the pointer segment type', 'PointerTest')
+@Parametrization.case('Static segment push and pop operations', 'StaticTest')
+@Parametrization.case('Simple label and ifgoto operation', 'SimpleLoop')
+@Parametrization.case('Test branching logic ', 'BranchingTest')
 def test_translator(test_subject):
 
     input_ = f'{TESTS_BASE_DIR}/test_files/{test_subject}.vm'

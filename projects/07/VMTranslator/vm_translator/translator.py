@@ -37,6 +37,8 @@ class Translator(object):
                 self._handle_label(vm_command)
             elif vm_command.command_type == CommandType.IFGOTO:
                 self._handle_ifgoto(vm_command)
+            elif vm_command.command_type == CommandType.GOTO:
+                self._handle_goto(vm_command)
 
             self._command_counter += 1
             self._output_asm_file.write('\n'.join(self._current_code) + '\n')
@@ -49,6 +51,10 @@ class Translator(object):
         self._pop_stack('D')
         self._add_a_command(f'{self._vm_file_name}.{vm_command.arg1}')
         self._current_code.append('D;JNE')
+
+    def _handle_goto(self, vm_command):
+        self._add_a_command(f'{self._vm_file_name}.{vm_command.arg1}')
+        self._current_code.append('0;JMP')
 
     def _handle_push(self, vm_command):
         segment_type = vm_command.arg1
