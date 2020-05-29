@@ -28,4 +28,4 @@ def test_translator(test_subject):
     expected_content = Path(f'{TESTS_BASE_DIR}/test_files/{test_subject}.expected').read_text()
     actual_content = Path(temp).read_text()
     assert actual_content == expected_content
-
+    Path(temp).unlink()
