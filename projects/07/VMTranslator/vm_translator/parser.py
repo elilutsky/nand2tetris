@@ -19,6 +19,9 @@ class CommandType(Enum):
     ARITHMETIC = 1
     POP = 2
     PUSH = 3
+    LABEL = 4
+    IFGOTO = 5
+    GOTO = 6
 
 
 class Commands(Enum):
@@ -33,6 +36,9 @@ class Commands(Enum):
     NOT = Command('not', CommandType.ARITHMETIC)
     POP = Command('pop', CommandType.POP)
     PUSH = Command('push', CommandType.PUSH)
+    LABEL = Command('label', CommandType.LABEL)
+    IFGOTO = Command('if-goto', CommandType.IFGOTO)
+    GOTO = Command('goto', CommandType.GOTO)
 
     @staticmethod
     def by_command(cmd):
