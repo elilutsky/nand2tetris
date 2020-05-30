@@ -33,10 +33,26 @@ class Translator(object):
                 self._handle_push(vm_command)
             elif vm_command.command_type == CommandType.POP:
                 self._handle_pop(vm_command)
+            elif vm_command.command_type == CommandType.BRANCH:
+                self._handle_branch(vm_command)
 
             self._command_counter += 1
             self._output_asm_file.write('\n'.join(self._current_code) + '\n')
             self._current_code = []
+
+    def _handle_branch(self, vm_command):
+        label = f"{self._current_function_name}${vm_command.arg1}"
+        if vm_command.command == Commands.LABEL:
+            self._add_label_command(label)
+        elif vm_command.command == Commands.GOTO:
+            self._add_a_command(label)
+            self._add_c_command(comp='0', jump='JMP')
+        elif vm_command.command == Commands.IF_GOTO:
+            self._pop_stack('D')
+            self._add_a_command(label)
+            self._add_c_command(comp='D', jump='JNE')
+        else:
+            raise Exception(f'Unexpected branch command: {vm_command}')
 
     def _handle_push(self, vm_command):
         segment_type = vm_command.arg1
