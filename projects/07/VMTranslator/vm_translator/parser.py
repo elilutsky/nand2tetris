@@ -20,6 +20,9 @@ class CommandType(Enum):
     POP = 2
     PUSH = 3
     BRANCH = 4
+    CALL = 5
+    FUNCTION = 6
+    RETURN = 7
 
 
 class Commands(Enum):
@@ -37,6 +40,9 @@ class Commands(Enum):
     LABEL = Command('label', CommandType.BRANCH)
     GOTO = Command('goto', CommandType.BRANCH)
     IF_GOTO = Command('if-goto', CommandType.BRANCH)
+    CALL = Command('call', CommandType.CALL)
+    FUNCTION = Command('function', CommandType.FUNCTION)
+    RETURN = Command('return', CommandType.RETURN)
 
     @staticmethod
     def by_command(cmd):

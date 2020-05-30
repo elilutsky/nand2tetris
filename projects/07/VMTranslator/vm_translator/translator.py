@@ -22,8 +22,33 @@ class Translator(object):
         self._current_code = []
         self._vm_code_file = vm_code_file
         self._output_asm_file = output_asm_file
-        self._command_counter = 0
+
         self._vm_file_name = vm_file_name
+        self._enter_function()
+
+    def _enter_function(self, function_name=None):
+        """
+        Informs the translator of a beginning of a new function
+        This resets the counters and symbols used to generate the unique labels
+
+        :param function_name: function name. If set to None then vm file name will be used as the base
+        of symbol names instead
+        """
+        self._comparison_counter = 0
+        self._return_label_counter = 0
+        self._current_function_name = function_name if function_name else self._vm_file_name
+
+    def _generate_return_label(self):
+        label_name = f"{self._current_function_name}$ret.{self._return_label_counter}"
+        self._return_label_counter += 1
+        return label_name
+
+    def _generate_comparsion_labels(self):
+        true_label_name = f"{self._current_function_name}$_comparsion_true.{self._comparison_counter}"
+        end_label_name = f"{self._current_function_name}$_comparsion_end.{self._comparison_counter}"
+
+        self._comparison_counter += 1
+        return true_label_name, end_label_name
 
     def translate_data(self):
         for vm_command in parse_code(self._vm_code_file):
@@ -35,10 +60,114 @@ class Translator(object):
                 self._handle_pop(vm_command)
             elif vm_command.command_type == CommandType.BRANCH:
                 self._handle_branch(vm_command)
+            elif vm_command.command_type == CommandType.CALL:
+                self._handle_call(vm_command)
+            elif vm_command.command_type == CommandType.FUNCTION:
+                self._handle_function(vm_command)
+            elif vm_command.command_type == CommandType.RETURN:
+                self._handle_return()
 
-            self._command_counter += 1
             self._output_asm_file.write('\n'.join(self._current_code) + '\n')
             self._current_code = []
+
+    def _handle_call(self, vm_command):
+        function_name = vm_command.arg1
+        num_args = vm_command.arg2
+        return_address_label = self._generate_return_label()
+
+        self._push_label_to_stack(return_address_label)
+        self._push_register_to_stack('LCL')
+        self._push_register_to_stack('ARG')
+        self._push_register_to_stack('THIS')
+        self._push_register_to_stack('THAT')
+
+        # ARG = SP - num_args - 5
+        self._add_a_command('SP')
+        self._add_c_command('D', 'M')
+        self._add_a_command(num_args)
+        self._add_c_command('D', 'D-A')
+        self._add_a_command('5')
+        self._add_c_command('D', 'D-A')
+        self._add_a_command('ARG')
+        self._add_c_command('M', 'D')
+
+        # LCL = SP
+        self._add_a_command('SP')
+        self._add_c_command('D', 'M')
+        self._add_a_command('LCL')
+        self._add_c_command('M', 'D')
+
+        # jump
+        self._add_a_command(function_name)
+        self._add_c_command(comp='0', jump='JMP')
+
+        # define return label
+        self._add_label_command(return_address_label)
+
+    def _handle_return(self):
+
+        # store FRAME (LCL) in R13
+        self._add_a_command('LCL')
+        self._add_c_command('D', 'M')
+
+        self._add_a_command('R13')
+        self._add_c_command('M', 'D')
+
+        # *ARG = pop()
+        self._pop_stack('D')
+        self._add_a_command('ARG')
+        self._add_c_command('A', 'M')
+        self._add_c_command('M', 'D')
+
+        # SP = ARG + 1
+        self._add_a_command('ARG')
+        self._add_c_command('D', 'M+1')
+        self._add_a_command('SP')
+        self._add_c_command('M', 'D')
+
+        #  THAT, THIS, ARG, LCL  =  *(FRAME-1), *(FRAME-2), *(FRAME-3), *(FRAME-4)
+
+        def _load_from_frame(num_subs, target):
+            # target = *(FRAME - num_subs)
+            # where FRAME is stored in R13
+
+            self._add_a_command('R13')
+            self._add_c_command('D', 'M')
+            for i in range(num_subs - 1):
+                self._add_c_command('D', 'D-1')
+            self._add_c_command('A', 'D-1')
+            self._add_c_command(target, 'M')
+
+        def _restore_from_frame(num_subs, target_segment_register):
+            # target_register = *(FRAME - num_subs)
+            # where FRAME is stored in R13
+
+            _load_from_frame(num_subs, 'D')
+
+            self._add_a_command(target_segment_register)
+            self._add_c_command('M', 'D')
+
+        _restore_from_frame(1, 'THAT')
+        _restore_from_frame(2, 'THIS')
+        _restore_from_frame(3, 'ARG')
+        _restore_from_frame(4, 'LCL')
+
+        # A = *(FRAME-5), A now holds return address
+        _load_from_frame(5, 'A')
+
+        self._add_c_command(comp='0', jump='JMP')
+
+    def _handle_function(self, vm_command):
+        function_name = vm_command.arg1
+        num_local_vars = vm_command.arg2
+
+        self._return_label_counter = 0
+        self._current_function_name = function_name
+
+        self._add_label_command(function_name)
+
+        for i in range(int(num_local_vars)):
+            self._push_constant('0')
 
     def _handle_branch(self, vm_command):
         label = f"{self._current_function_name}${vm_command.arg1}"
@@ -175,8 +304,7 @@ class Translator(object):
         self._push_to_stack('D')
 
     def _handle_comparison(self, branch_condition):
-        true_label = f'_LOGICAL_SET_TRUE_{self._command_counter}'
-        end_label = f'_LOGICAL_END_{self._command_counter}'
+        true_label, end_label = self._generate_comparsion_labels()
 
         self._pop_stack('D')
         self._pop_stack('A')
@@ -226,6 +354,17 @@ class Translator(object):
     def _increase_sp(self):
         self._add_a_command('SP')
         self._add_c_command('M', 'M+1')
+
+    def _push_label_to_stack(self, label):
+        self._push_constant(label)
+
+    def _push_register_to_stack(self, register):
+        """
+        :param symbol: a register identifier, e.g. R13, LCL, ARG.
+        """
+        self._add_a_command(register)
+        self._add_c_command(dest='D', comp='M')
+        self._push_to_stack('D')
 
     def _add_a_command(self, param):
         self._current_code.append(f'@{param}')
