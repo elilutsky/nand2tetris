@@ -46,13 +46,12 @@ class BlockList {
 		return;
 	}
 	
-	/** Removes the last element from the list and erases the block. */
+	/** Removes the last element from the list and erases the block. This
+		method expects the list to contain more that 1 element. */
 	method BlockList removeLast() {
 		var BlockList lastBlockList;
 		var Block lastBlock;
-		if (next = null) {
-			return this;
-		}
+
 		if (next.getNext() = null) {
 			let lastBlockList = next;
 			let lastBlock = next.getBlock();

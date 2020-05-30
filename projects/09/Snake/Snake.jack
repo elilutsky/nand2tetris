@@ -1,0 +1,46 @@
+class Snake {
+    field BlockList blockList;
+	// 1 = Right, 2 = Left, 3 = Up, 4 = Down
+	field int direction;
+
+    /** Creates a new snake. */
+    constructor Snake new(Block blockListIn) {
+		let blockList = blockListIn;
+		let direction = 1;
+        return this;
+    }
+
+    /** Deallocates the object's memory. */
+    method void dispose() {
+		do blockList.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Draws the snake on the screen. */
+    method void draw() {
+        do blockList.draw();
+        return;
+    }
+	
+	method void move() {
+		var BlockList lastBlockList;
+		var Block lastBlock, firstBlock;
+		
+		let lastBlockList = blockList.removeLast();
+		let lastBlock = lastBlockList.getBlock();
+		let firstBlock = blockList.getBlock();
+		
+		do lastBlock.setX(firstBlock.getX() - firstBlock.getSize() - 5);
+		//do lastBlock.setY(firstBlock.getY() + (firstBlock.getSize() * 3));
+		
+		do lastBlockList.appendBlockList(blockList); // move the last element to be the first;
+		let blockList = lastBlockList;
+		return;
+	}
+
+
+	/** Getters */
+	
+	method int getDirection() { return direction; }
+}

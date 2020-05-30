@@ -1,0 +1,31 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/09/List/Main.jack
+
+
+class Main {
+   function void main() {
+		var Block first, second, last;
+		var BlockList lst;
+		var Snake snake;
+		var int counter;
+		
+		let first = Block.new(200, 120);
+		let second = Block.new(220, 120);
+		let last = Block.new(240, 120);
+		let lst = BlockList.new(first);
+		do lst.appendBlock(second);
+		do lst.appendBlock(last);
+		
+		let snake = Snake.new(lst);
+		do snake.draw();
+		
+		while (true) {
+			do Sys.wait(1000);
+			do snake.move();
+			do snake.draw();
+		}
+		return;
+   }
+}
