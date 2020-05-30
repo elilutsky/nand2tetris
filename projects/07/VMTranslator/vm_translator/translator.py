@@ -106,27 +106,6 @@ class Translator(object):
 
     def _handle_return(self):
 
-        # store FRAME (LCL) in R13
-        self._add_a_command('LCL')
-        self._add_c_command('D', 'M')
-
-        self._add_a_command('R13')
-        self._add_c_command('M', 'D')
-
-        # *ARG = pop()
-        self._pop_stack('D')
-        self._add_a_command('ARG')
-        self._add_c_command('A', 'M')
-        self._add_c_command('M', 'D')
-
-        # SP = ARG + 1
-        self._add_a_command('ARG')
-        self._add_c_command('D', 'M+1')
-        self._add_a_command('SP')
-        self._add_c_command('M', 'D')
-
-        #  THAT, THIS, ARG, LCL  =  *(FRAME-1), *(FRAME-2), *(FRAME-3), *(FRAME-4)
-
         def _load_from_frame(num_subs, target):
             # target = *(FRAME - num_subs)
             # where FRAME is stored in R13
@@ -147,14 +126,40 @@ class Translator(object):
             self._add_a_command(target_segment_register)
             self._add_c_command('M', 'D')
 
+        # store FRAME (LCL) in R13
+        self._add_a_command('LCL')
+        self._add_c_command('D', 'M')
+
+        self._add_a_command('R13')
+        self._add_c_command('M', 'D')
+
+        # store RET in R14
+        # R14 = *(FRAME-5)
+        _load_from_frame(5, 'D')
+        self._add_a_command('R14')
+        self._add_c_command('M', 'D')
+
+        # *ARG = pop()
+        self._pop_stack('D')
+        self._add_a_command('ARG')
+        self._add_c_command('A', 'M')
+        self._add_c_command('M', 'D')
+
+        # SP = ARG + 1
+        self._add_a_command('ARG')
+        self._add_c_command('D', 'M+1')
+        self._add_a_command('SP')
+        self._add_c_command('M', 'D')
+
+        #  THAT, THIS, ARG, LCL  =  *(FRAME-1), *(FRAME-2), *(FRAME-3), *(FRAME-4)
         _restore_from_frame(1, 'THAT')
         _restore_from_frame(2, 'THIS')
         _restore_from_frame(3, 'ARG')
         _restore_from_frame(4, 'LCL')
 
-        # A = *(FRAME-5), A now holds return address
-        _load_from_frame(5, 'A')
-
+        # jump to saved return address
+        self._add_a_command('R14')
+        self._add_c_command('A', 'M')
         self._add_c_command(comp='0', jump='JMP')
 
     def _handle_function(self, vm_command):
