@@ -112,9 +112,8 @@ class Translator(object):
 
             self._add_a_command('R13')
             self._add_c_command('D', 'M')
-            for i in range(num_subs - 1):
-                self._add_c_command('D', 'D-1')
-            self._add_c_command('A', 'D-1')
+            self._add_a_command(f'{num_subs}')
+            self._add_c_command('A', 'D-A')
             self._add_c_command(target, 'M')
 
         def _restore_from_frame(num_subs, target_segment_register):
