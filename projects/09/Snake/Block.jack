@@ -1,9 +1,5 @@
 class Block {
-
-    // Position on screen
     field int x, y;
-	
-    // Size of the Block
     field int size;
 
     /** Constructs a new block with a given position and size. */
@@ -36,10 +32,6 @@ class Block {
 
 	/** Getters */
 	
-	method int getX() {
-		return x;
-	}
-	method int getY() {
-		return y;
-	}
+	method int getX() { return x; }
+	method int getY() { return y; }
 }
