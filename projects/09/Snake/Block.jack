@@ -1,0 +1,45 @@
+class Block {
+
+    // Position on screen
+    field int x, y;
+	
+    // Size of the Block
+    field int size;
+
+    /** Constructs a new block with a given position and size. */
+    constructor Block new(int xPos, int yPos) {
+        let x = xPos;
+        let y = yPos;
+		let size = 15;
+        return this;
+    }
+
+    /** Deallocates the object's memory. */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Draws the square on the screen. */
+    method void draw() {
+        do Screen.setColor(true);
+        do Screen.drawRectangle(x, y, (x + size), (y + size));
+        return;
+    }
+
+    /** Erases the square from the screen. */
+    method void erase() {
+        do Screen.setColor(false);
+        do Screen.drawRectangle(x, y, (x + size), (y + size));
+        return;
+    }
+
+	/** Getters */
+	
+	method int getX() {
+		return x;
+	}
+	method int getY() {
+		return y;
+	}
+}
