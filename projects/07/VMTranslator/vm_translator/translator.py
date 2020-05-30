@@ -1,30 +1,42 @@
 from pathlib import Path
 
-from .parser import parse_code, SegmentType, CommandType, Commands
+from .parser import parse_code, SegmentType, CommandType, Commands, VMCommand
 
 
-def translate(f):
+def translate(input_path):
     """
-    Translate the given `.vm` file `f` to a Hack file. The result will be saved in `f.asm`
+    Translate the given `.vm` file to a Hack file. The result will be saved in `<input_path>.asm`
+    If input_path is a directory, then all the .vm files in the directory will be translated to a single .asm file
+    named '<input_path>.asm'
     """
-    input_file_path = Path(f)
-    if input_file_path.suffix != '.vm':
-        raise Exception('Expected .vm file')
+    input_path = Path(input_path)
+    if not input_path.is_dir() and input_path.suffix != '.vm':
+        raise Exception('Expected .vm file or a directory of .vm files')
 
-    with open(f, 'r') as input_file:
-        with open(input_file_path.with_suffix('.asm'), 'w') as output_file:
-            translator = Translator(input_file, output_file, input_file_path.stem)
-            translator.translate_data()
+    input_files = list(input_path.rglob('*.vm')) if input_path.is_dir() else [input_path]
+
+    with open(input_path.with_suffix('.asm'), 'w') as output_file:
+        write_bootstrap = input_path.is_dir()
+        for input_file in input_files:
+            with open(input_file, 'r') as input_file_handle:
+                translator = Translator(input_file_handle, output_file, input_file.stem, write_bootstrap)
+                translator.translate_data()
+
+            # bootstrap code is only written for the first .vm file, and only when a directory was given
+            write_bootstrap = False
 
 
 class Translator(object):
-    def __init__(self, vm_code_file, output_asm_file, vm_file_name):
+    def __init__(self, vm_code_file, output_asm_file, vm_file_name, write_bootstrap):
         self._current_code = []
         self._vm_code_file = vm_code_file
         self._output_asm_file = output_asm_file
 
         self._vm_file_name = vm_file_name
         self._enter_function()
+
+        if write_bootstrap:
+            self._write_bootstrap_code()
 
     def _enter_function(self, function_name=None):
         """
@@ -49,6 +61,18 @@ class Translator(object):
 
         self._comparison_counter += 1
         return true_label_name, end_label_name
+
+    def _write_bootstrap_code(self):
+        # SP = 256
+        self._add_a_command('256')
+        self._add_c_command('D', 'A')
+        self._add_a_command('SP')
+        self._add_c_command('M', 'D')
+
+        self._handle_call(VMCommand('call Sys.init 0'))
+
+        self._output_asm_file.write('\n'.join(self._current_code) + '\n')
+        self._current_code = []
 
     def translate_data(self):
         for vm_command in parse_code(self._vm_code_file):
