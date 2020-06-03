@@ -9,7 +9,7 @@ class Main {
 		var Block first, second, last;
 		var BlockList lst;
 		var Snake snake;
-		var int counter;
+		var int counter, key;
 		
 		let first = Block.new(200, 120);
 		let second = Block.new(220, 120);
@@ -22,9 +22,17 @@ class Main {
 		do snake.draw();
 		
 		while (true) {
-			do Sys.wait(1000);
+		
+			let key = Keyboard.keyPressed();
+			if (key = 130) { do snake.setDirection(2);} // Left key
+			if (key = 131) { do snake.setDirection(3);} // Up key
+			if (key = 132) { do snake.setDirection(1);} // Right key
+			if (key = 133) { do snake.setDirection(4);} // Down key
+			
 			do snake.move();
 			do snake.draw();
+			
+			do Sys.wait(100);
 		}
 		return;
    }

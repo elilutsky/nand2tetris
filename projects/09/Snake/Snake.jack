@@ -6,7 +6,7 @@ class Snake {
     /** Creates a new snake. */
     constructor Snake new(Block blockListIn) {
 		let blockList = blockListIn;
-		let direction = 1;
+		let direction = 2;
         return this;
     }
 
@@ -31,11 +31,38 @@ class Snake {
 		let lastBlock = lastBlockList.getBlock();
 		let firstBlock = blockList.getBlock();
 		
-		do lastBlock.setX(firstBlock.getX() - firstBlock.getSize() - 5);
-		//do lastBlock.setY(firstBlock.getY() + (firstBlock.getSize() * 3));
+		if (direction = 1) {
+			do lastBlock.setX(firstBlock.getX() + firstBlock.getSize() + 5);
+			do lastBlock.setY(firstBlock.getY());
+		}
+		if (direction = 2) {
+			do lastBlock.setX(firstBlock.getX() - firstBlock.getSize() - 5);
+			do lastBlock.setY(firstBlock.getY());
+		}
+		if (direction = 3) {
+			do lastBlock.setY(firstBlock.getY() - firstBlock.getSize() - 5);
+			do lastBlock.setX(firstBlock.getX());
+		}
+		if (direction = 4) {
+			do lastBlock.setY(firstBlock.getY() + firstBlock.getSize() + 5);
+			do lastBlock.setX(firstBlock.getX());
+		}
 		
 		do lastBlockList.appendBlockList(blockList); // move the last element to be the first;
 		let blockList = lastBlockList;
+		return;
+	}
+	
+	method void setDirection(int newDirection) {
+		if (((direction = 1) & (newDirection = 2)) | ((direction = 2) & (newDirection = 1))) {
+			// U-turns are not allowed
+			return;
+		}
+		if (((direction = 3) & (newDirection = 4)) | ((direction = 4) & (newDirection = 3))) {
+			// U-turns are not allowed
+			return;
+		}
+		let direction = newDirection;
 		return;
 	}
 
