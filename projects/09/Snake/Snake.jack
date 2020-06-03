@@ -23,6 +23,7 @@ class Snake {
         return;
     }
 	
+	/** Moves the snake one step in the current direction. */
 	method void move() {
 		var BlockList lastBlockList;
 		var Block lastBlock, firstBlock;
@@ -53,13 +54,14 @@ class Snake {
 		return;
 	}
 	
+	/** Sets the direction of the snake. U-Turns are not allowd. */
 	method void setDirection(int newDirection) {
 		if (((direction = 1) & (newDirection = 2)) | ((direction = 2) & (newDirection = 1))) {
-			// U-turns are not allowed
+			// U-Turns are not allowed
 			return;
 		}
 		if (((direction = 3) & (newDirection = 4)) | ((direction = 4) & (newDirection = 3))) {
-			// U-turns are not allowed
+			// U-Turns are not allowed
 			return;
 		}
 		let direction = newDirection;
