@@ -20,7 +20,7 @@ class Main {
 		
 		let snake = Snake.new(lst);
 		do snake.draw();
-		
+		do Output.printString("Dice game start!");
 		while (true) {
 		
 			let key = Keyboard.keyPressed();
@@ -31,6 +31,7 @@ class Main {
 			
 			do snake.move();
 			do snake.draw();
+			do snake.increaseSize();
 			
 			do Sys.wait(100);
 		}

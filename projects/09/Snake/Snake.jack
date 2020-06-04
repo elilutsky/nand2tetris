@@ -54,7 +54,7 @@ class Snake {
 		return;
 	}
 	
-	/** Sets the direction of the snake. U-Turns are not allowd. */
+	/** Sets the direction of the snake. U-Turns are not allowed. */
 	method void setDirection(int newDirection) {
 		if (((direction = 1) & (newDirection = 2)) | ((direction = 2) & (newDirection = 1))) {
 			// U-Turns are not allowed
@@ -67,9 +67,26 @@ class Snake {
 		let direction = newDirection;
 		return;
 	}
+	
+	/** Increases the size of the snake by 1 */
+	method void increaseSize() {
+		var Block newBlock, firstBlock;
+		var BlockList newBlockList;
+		
+		let firstBlock = blockList.getBlock();
+		// Set the coordinates to those of the first block so it will not be seen until the snake moves
+		let newBlock = Block.new(firstBlock.getX(), firstBlock.getY()); 
+		let newBlockList = BlockList.new(newBlock);
+		
+		// Set the newly added block to be the last. The next time the snake will move it will become the first 
+		// and will be rendered if `draw()` is called.
+		do blockList.appendBlockList(newBlockList);
+		return;
+	}
 
 
 	/** Getters */
 	
 	method int getDirection() { return direction; }
+	method int getFirstBlockList() { return blockList; }
 }
