@@ -1,0 +1,38 @@
+class Game {
+	field int screenWidth, screenHeight, topLimit, bottomLimit, rightLimit, leftLimit, borderSize;
+
+    /** Constructs a new Game object. */
+    constructor Game new(int screenWidthIn, int screenHeightIn, int borderSizeIn) {
+		let borderSize = borderSizeIn;
+		let screenWidth = screenWidthIn;
+		let screenHeight = screenHeightIn;
+        let topLimit = borderSize;
+        let bottomLimit = screenHeightIn - borderSize;
+        let rightLimit = screenWidthIn - borderSize;
+        let leftLimit = borderSize;
+        return this;
+    }
+
+    /** Deallocates the object's memory. */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+	
+	method void drawLimits() {
+		// Top limit
+		do Screen.drawRectangle(0, 0, screenWidth, topLimit);
+		// Left Limit
+		do Screen.drawRectangle(0, 0, leftLimit, screenHeight);
+		// Right Limit
+		do Screen.drawRectangle(rightLimit, 0, screenWidth, screenHeight);
+		// Bottom Limit
+		do Screen.drawRectangle(0, bottomLimit, screenWidth, screenHeight);
+		return;
+	}
+	
+	method void startGame() {
+		do drawLimits();
+		return;
+	}
+}

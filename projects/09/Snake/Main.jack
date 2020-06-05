@@ -6,17 +6,25 @@
 
 class Main {
    function void main() {
-		var Block first, second, last;
+		var Game game;
+		var Block first, second, third, fourth, last;
 		var BlockList lst;
 		var Snake snake;
 		var int counter, key;
 		
 		let first = Block.new(200, 120);
 		let second = Block.new(220, 120);
+		let third = Block.new(240, 120);
+		let fourth = Block.new(240, 120);
 		let last = Block.new(240, 120);
 		let lst = BlockList.new(first);
 		do lst.appendBlock(second);
+		do lst.appendBlock(third);
+		do lst.appendBlock(fourth);
 		do lst.appendBlock(last);
+		
+		let game = Game.new(511, 255, 20);
+		do game.startGame();
 		
 		let snake = Snake.new(lst);
 		do snake.draw();
@@ -31,7 +39,7 @@ class Main {
 			
 			do snake.move();
 			do snake.draw();
-			do snake.increaseSize();
+			//do snake.increaseSize();
 			
 			do Sys.wait(100);
 		}
