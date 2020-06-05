@@ -7,42 +7,8 @@
 class Main {
    function void main() {
 		var Game game;
-		var Block first, second, third, fourth, last;
-		var BlockList lst;
-		var Snake snake;
-		var int counter, key;
-		
-		let first = Block.new(200, 120);
-		let second = Block.new(220, 120);
-		let third = Block.new(240, 120);
-		let fourth = Block.new(240, 120);
-		let last = Block.new(240, 120);
-		let lst = BlockList.new(first);
-		do lst.appendBlock(second);
-		do lst.appendBlock(third);
-		do lst.appendBlock(fourth);
-		do lst.appendBlock(last);
-		
 		let game = Game.new(511, 255, 20);
-		do game.startGame();
-		
-		let snake = Snake.new(lst);
-		do snake.draw();
-		do Output.printString("Dice game start!");
-		while (true) {
-		
-			let key = Keyboard.keyPressed();
-			if (key = 130) { do snake.setDirection(2);} // Left key
-			if (key = 131) { do snake.setDirection(3);} // Up key
-			if (key = 132) { do snake.setDirection(1);} // Right key
-			if (key = 133) { do snake.setDirection(4);} // Down key
-			
-			do snake.move();
-			do snake.draw();
-			//do snake.increaseSize();
-			
-			do Sys.wait(100);
-		}
+		do game.startGame();	
 		return;
    }
 }
