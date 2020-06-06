@@ -22,41 +22,36 @@ class Game {
 
     /** Deallocates the object's memory. */
     method void dispose() {
+		do snake.dispose();
+		do rand.dispose();
+		do food.dispose();
         do Memory.deAlloc(this);
         return;
     }
 	
-	method void drawLimits() {
-		// Top limit
-		do Screen.drawRectangle(0, 0, screenWidth, topLimit);
-		// Left Limit
-		do Screen.drawRectangle(0, 0, leftLimit, screenHeight);
-		// Right Limit
-		do Screen.drawRectangle(rightLimit, 0, screenWidth, screenHeight);
-		// Bottom Limit
-		do Screen.drawRectangle(0, bottomLimit, screenWidth, screenHeight);
+	method void createSnake() {
+		let snake = Snake.new(15);
+		do snake.initBasicSnake(200, 120);
 		return;
 	}
 	
-	method void createSnake() {
-		var Block first, second, third, fourth;
-		var BlockList lst;
-		
-		let first = Block.new(200, 120);
-		let second = Block.new(220, 120);
-		let third = Block.new(240, 120);
-		let fourth = Block.new(240, 120);
-		let lst = BlockList.new(first);
-		do lst.appendBlock(second);
-		do lst.appendBlock(third);
-		do lst.appendBlock(fourth);
-		
-		let snake = Snake.new(lst);
+	method void createFood() {
+		var int x, y, radius;
+		let radius = 5;
+		let x = rand.randRange(rightLimit - leftLimit - radius) + leftLimit + radius;
+		let y = rand.randRange(bottomLimit - topLimit - radius) + topLimit + radius;
+		let food = Food.new(x, y, radius);
+		let foodExists = true;
+		do food.draw();
 		return;
 	}
 	
 	method boolean isGameOver() {
-		return (~snake.isInArea(topLimit, bottomLimit, leftLimit, rightLimit));
+		if (snake.doesCollide(0, topLimit, 0, screenWidth)) { return true; }
+		if (snake.doesCollide(0, screenHeight, 0, leftLimit)) { return true; }
+		if (snake.doesCollide(0, screenHeight, rightLimit, screenWidth)) { return true; }
+		if (snake.doesCollide(bottomLimit, screenHeight, 0, screenWidth)) { return true; }
+		return false;
 	}
 	
 	/** Prompts for game start and seeds the game random */
@@ -78,14 +73,15 @@ class Game {
 		return;
 	}
 	
-	method void createFood() {
-		var int x, y, radius;
-		let radius = 5;
-		let x = rand.randRange(rightLimit - leftLimit - radius) + leftLimit + radius;
-		let y = rand.randRange(bottomLimit - topLimit - radius) + topLimit + radius;
-		let food = Food.new(x, y, radius);
-		let foodExists = true;
-		do food.draw();
+	method void drawLimits() {
+		// Top limit
+		do Screen.drawRectangle(0, 0, screenWidth, topLimit);
+		// Left Limit
+		do Screen.drawRectangle(0, 0, leftLimit, screenHeight);
+		// Right Limit
+		do Screen.drawRectangle(rightLimit, 0, screenWidth, screenHeight);
+		// Bottom Limit
+		do Screen.drawRectangle(0, bottomLimit, screenWidth, screenHeight);
 		return;
 	}
 	
@@ -93,6 +89,12 @@ class Game {
 		do Output.moveCursor(0, 0);
 		do Output.printString("Score: ");
 		do Output.printInt(score);
+		return;
+	}
+	
+	method void drawGame() {
+		do snake.draw();
+		do printScore();
 		return;
 	}
 	
@@ -106,10 +108,7 @@ class Game {
 		do waitGameStart();
 		
 		do drawLimits();
-		
-		do snake.draw();
-		do printScore();
-		
+		do drawGame();
 		while (~(isOver)) {
 		
 			let key = Keyboard.keyPressed();
@@ -119,13 +118,12 @@ class Game {
 			if (key = 133) { do snake.setDirection(4);} // Down key
 			
 			do snake.move();
-			do snake.draw();
 			
 			if (~(foodExists)) {
 				do createFood();
 			}
 			
-			do printScore();
+			do drawGame();
 			
 			let isOver = isGameOver();
 			

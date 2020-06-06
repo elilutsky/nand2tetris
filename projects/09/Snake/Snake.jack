@@ -1,11 +1,12 @@
 class Snake {
     field BlockList blockList;
+	field int blockSize;
 	// 1 = Right, 2 = Left, 3 = Up, 4 = Down
 	field int direction;
 
     /** Creates a new snake. */
-    constructor Snake new(Block blockListIn) {
-		let blockList = blockListIn;
+    constructor Snake new(int blockSizeIn) {
+		let blockSize = blockSizeIn;
 		let direction = 2;
         return this;
     }
@@ -16,6 +17,17 @@ class Snake {
         do Memory.deAlloc(this);
         return;
     }
+	
+	method void initBasicSnake(int startLocationX, int startLocationY) {
+		var Block first, second, third;
+		let first = Block.new(startLocationX, startLocationY, blockSize);
+		let second = Block.new(startLocationX + blockSize + 5, startLocationY, blockSize);
+		let third = Block.new(startLocationX + (blockSize * 2) + 5, startLocationY, blockSize);
+		let blockList = BlockList.new(first);
+		do blockList.appendBlock(second);
+		do blockList.appendBlock(third);
+		return;
+	}
 
     /** Draws the snake on the screen. */
     method void draw() {
@@ -33,19 +45,19 @@ class Snake {
 		let firstBlock = blockList.getBlock();
 		
 		if (direction = 1) {
-			do lastBlock.setX(firstBlock.getX() + firstBlock.getSize() + 5);
+			do lastBlock.setX(firstBlock.getX() + blockSize + 5);
 			do lastBlock.setY(firstBlock.getY());
 		}
 		if (direction = 2) {
-			do lastBlock.setX(firstBlock.getX() - firstBlock.getSize() - 5);
+			do lastBlock.setX(firstBlock.getX() - blockSize - 5);
 			do lastBlock.setY(firstBlock.getY());
 		}
 		if (direction = 3) {
-			do lastBlock.setY(firstBlock.getY() - firstBlock.getSize() - 5);
+			do lastBlock.setY(firstBlock.getY() - blockSize - 5);
 			do lastBlock.setX(firstBlock.getX());
 		}
 		if (direction = 4) {
-			do lastBlock.setY(firstBlock.getY() + firstBlock.getSize() + 5);
+			do lastBlock.setY(firstBlock.getY() + blockSize + 5);
 			do lastBlock.setX(firstBlock.getX());
 		}
 		
@@ -75,7 +87,7 @@ class Snake {
 		
 		let firstBlock = blockList.getBlock();
 		// Set the coordinates to those of the first block so it will not be seen until the snake moves
-		let newBlock = Block.new(firstBlock.getX(), firstBlock.getY()); 
+		let newBlock = Block.new(firstBlock.getX(), firstBlock.getY(), blockSize); 
 		let newBlockList = BlockList.new(newBlock);
 		
 		// Set the newly added block to be the last. The next time the snake will move it will become the first 
@@ -87,37 +99,40 @@ class Snake {
 	method int getHeadTop() {
 		var Block firstBlock;
 		let firstBlock = blockList.getBlock();
-		return firstBlock.getX();
+		return firstBlock.getY();
 	}
 	
 	method int getHeadLeft() {
 		var Block firstBlock;
 		let firstBlock = blockList.getBlock();
-		return firstBlock.getY();
+		return firstBlock.getX();
 	}
 	
 	method int getHeadRight() {
-		var Block firstBlock;
-		let firstBlock = blockList.getBlock();
-		return firstBlock.getX() + firstBlock.getSize();
+		return getHeadLeft() + blockSize;
 	}
 	
 	method int getHeadBottom() {
-		var Block firstBlock;
-		let firstBlock = blockList.getBlock();
-		return firstBlock.getY() + firstBlock.getSize();
+		return getHeadTop() + blockSize;
 	}
 	
-	/** Returns true if the snake's head is in the given area */
-	method boolean isInArea(int top, int bottom, in left, int right) {
+	/** Returns true if the snake's head collides with the given area */
+	method boolean doesCollide(int top, int bottom, in left, int right) {
 		var int snakeTop, snakeLeft, snakeRight, snakeBottom;
 		let snakeTop = getHeadTop();
 		let snakeLeft = getHeadLeft();
 		let snakeRight = getHeadRight();
 		let snakeBottom = getHeadBottom();
 		
-		if ((snakeTop > top) & (snakeBottom < bottom) & (snakeRight < right) & (snakeLeft > left)) { 
-			return true;
+		if ((snakeTop > top) & (snakeTop < bottom)) {
+			if (((snakeRight < right) & (snakeRight > left)) | ((snakeLeft < right) & (snakeLeft > left))) {
+				return true;
+			}
+		}
+		if ((snakeBottom > top) & (snakeBottom < bottom)) {
+			if (((snakeRight < right) & (snakeRight > left)) | ((snakeLeft < right) & (snakeLeft > left))) {
+				return true;
+			}
 		}
 		return false;
 	}

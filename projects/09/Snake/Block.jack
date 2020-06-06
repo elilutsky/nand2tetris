@@ -3,10 +3,10 @@ class Block {
     field int size;
 
     /** Constructs a new block with a given position and size. */
-    constructor Block new(int xPos, int yPos) {
+    constructor Block new(int xPos, int yPos, int blockSizeIn) {
         let x = xPos;
         let y = yPos;
-		let size = 15;
+		let size = blockSizeIn;
         return this;
     }
 
