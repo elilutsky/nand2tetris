@@ -1,5 +1,6 @@
 class Game {
 	field int screenWidth, screenHeight, topLimit, bottomLimit, rightLimit, leftLimit, borderSize;
+	field int score;
 	field Snake snake;
 	field Random rand;
 	field boolean foodExists;
@@ -14,6 +15,8 @@ class Game {
         let bottomLimit = screenHeightIn - borderSize;
         let rightLimit = screenWidthIn - borderSize;
         let leftLimit = borderSize;
+		let score = 0;
+		do createSnake();
         return this;
     }
 
@@ -53,16 +56,7 @@ class Game {
 	}
 	
 	method boolean isGameOver() {
-		var int snakeTop, snakeLeft, snakeRight, snakeBottom;
-		let snakeTop = snake.getHeadTop();
-		let snakeLeft = snake.getHeadLeft();
-		let snakeRight = snake.getHeadRight();
-		let snakeBottom = snake.getHeadBottom();
-		if (snakeTop < topLimit) { return true; }
-		if (snakeLeft < leftLimit) { return true; }
-		if (snakeRight > rightLimit) { return true; }
-		if (snakeBottom > bottomLimit) { return true; }
-		return false;
+		return (~snake.isInArea(topLimit, bottomLimit, leftLimit, rightLimit));
 	}
 	
 	/** Prompts for game start and seeds the game random */
@@ -95,6 +89,13 @@ class Game {
 		return;
 	}
 	
+	method void printScore() {
+		do Output.moveCursor(0, 0);
+		do Output.printString("Score: ");
+		do Output.printInt(score);
+		return;
+	}
+	
 	method void startGame() {
 		var int counter, key;
 		var boolean isOver;
@@ -103,12 +104,12 @@ class Game {
 		let foodExists = false;
 	
 		do waitGameStart();
-		do Output.moveCursor(0, 0);
 		
 		do drawLimits();
-		do createSnake();
 		
 		do snake.draw();
+		do printScore();
+		
 		while (~(isOver)) {
 		
 			let key = Keyboard.keyPressed();
@@ -124,12 +125,13 @@ class Game {
 				do createFood();
 			}
 			
+			do printScore();
+			
 			let isOver = isGameOver();
 			
 			do Sys.wait(120);
 		}
-		do Output.printString("Game Over!");
-		do Sys.wait(2000);
+		do Output.printString(" Game Over!");
 		return;
 	}
 }

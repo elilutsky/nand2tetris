@@ -107,6 +107,20 @@ class Snake {
 		let firstBlock = blockList.getBlock();
 		return firstBlock.getY() + firstBlock.getSize();
 	}
+	
+	/** Returns true if the snake's head is in the given area */
+	method boolean isInArea(int top, int bottom, in left, int right) {
+		var int snakeTop, snakeLeft, snakeRight, snakeBottom;
+		let snakeTop = getHeadTop();
+		let snakeLeft = getHeadLeft();
+		let snakeRight = getHeadRight();
+		let snakeBottom = getHeadBottom();
+		
+		if ((snakeTop > top) & (snakeBottom < bottom) & (snakeRight < right) & (snakeLeft > left)) { 
+			return true;
+		}
+		return false;
+	}
 
 
 	/** Getters */
