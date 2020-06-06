@@ -134,10 +134,26 @@ class Snake {
 				return true;
 			}
 		}
+		if ((snakeTop = top) & (snakeLeft = left) & (snakeRight = right) & (snakeBottom = bottom)) { return true; }
 		return false;
 	}
 
-
+	/** Returns true if the snake collides with itself */
+	method boolean doesCollideWithItself() {
+		var BlockList lst;
+		var Block block;
+		let lst = blockList;
+		
+		while (~(lst.getNext() = null)) {
+			let lst = lst.getNext();
+			let block = lst.getBlock();
+			if (doesCollide(block.getY(), block.getY() + block.getSize(), block.getX(), block.getX() + block.getSize()) & block.isVisible()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	/** Getters */
 	
 	method int getDirection() { return direction; }

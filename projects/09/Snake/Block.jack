@@ -1,12 +1,14 @@
 class Block {
     field int x, y;
     field int size;
+	field boolean isVisible;
 
     /** Constructs a new block with a given position and size. */
     constructor Block new(int xPos, int yPos, int blockSizeIn) {
         let x = xPos;
         let y = yPos;
 		let size = blockSizeIn;
+		let isVisible = false;
         return this;
     }
 
@@ -18,6 +20,7 @@ class Block {
 
     /** Draws the square on the screen. */
     method void draw() {
+		let isVisible = true;
         do Screen.setColor(true);
         do Screen.drawRectangle(x, y, (x + size), (y + size));
         return;
@@ -25,6 +28,7 @@ class Block {
 
     /** Erases the square from the screen. */
     method void erase() {
+		let isVisible = false;
         do Screen.setColor(false);
         do Screen.drawRectangle(x, y, (x + size), (y + size));
         return;
@@ -35,6 +39,7 @@ class Block {
 	method int getX() { return x; }
 	method int getY() { return y; }
 	method int getSize() { return size; }
+	method int isVisible() { return isVisible; }
 	
 	/** Setters */ 
 	method void setX(int newX) { let x = newX; return; }

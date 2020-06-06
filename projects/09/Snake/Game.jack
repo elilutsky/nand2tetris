@@ -65,7 +65,7 @@ class Game {
 		if (snake.doesCollide(0, screenHeight, 0, leftLimit)) { return true; }
 		if (snake.doesCollide(0, screenHeight, rightLimit, screenWidth)) { return true; }
 		if (snake.doesCollide(bottomLimit, screenHeight, 0, screenWidth)) { return true; }
-		return false;
+		return snake.doesCollideWithItself();
 	}
 	
 	/** Prompts for game start and seeds the game random */
@@ -131,8 +131,6 @@ class Game {
 			if (key = 132) { do snake.setDirection(1);} // Right key
 			if (key = 133) { do snake.setDirection(4);} // Down key
 			
-			do snake.move();
-			
 			if (~(foodExists)) {
 				do createFood();
 			}
@@ -140,6 +138,8 @@ class Game {
 			if (detectFoodCollison()) {
 				do handleFoodCollision();
 			}
+			
+			do snake.move();
 			
 			do drawGame();
 			
