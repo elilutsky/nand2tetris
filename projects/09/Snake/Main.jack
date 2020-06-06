@@ -7,8 +7,10 @@
 class Main {
    function void main() {
 		var Game game;
-		let game = Game.new(511, 255, 20);
+		let game = Game.new(511, 255, 25);
 		do game.startGame();	
+		do game.dispose();
+		while (true) {}
 		return;
    }
 }

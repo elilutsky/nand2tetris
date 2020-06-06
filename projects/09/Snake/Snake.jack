@@ -83,6 +83,30 @@ class Snake {
 		do blockList.appendBlockList(newBlockList);
 		return;
 	}
+	
+	method int getHeadTop() {
+		var Block firstBlock;
+		let firstBlock = blockList.getBlock();
+		return firstBlock.getX();
+	}
+	
+	method int getHeadLeft() {
+		var Block firstBlock;
+		let firstBlock = blockList.getBlock();
+		return firstBlock.getY();
+	}
+	
+	method int getHeadRight() {
+		var Block firstBlock;
+		let firstBlock = blockList.getBlock();
+		return firstBlock.getX() + firstBlock.getSize();
+	}
+	
+	method int getHeadBottom() {
+		var Block firstBlock;
+		let firstBlock = blockList.getBlock();
+		return firstBlock.getY() + firstBlock.getSize();
+	}
 
 
 	/** Getters */

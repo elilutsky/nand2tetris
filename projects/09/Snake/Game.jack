@@ -1,6 +1,9 @@
 class Game {
 	field int screenWidth, screenHeight, topLimit, bottomLimit, rightLimit, leftLimit, borderSize;
 	field Snake snake;
+	field Random rand;
+	field boolean foodExists;
+	field Food food;
 
     /** Constructs a new Game object. */
     constructor Game new(int screenWidthIn, int screenHeightIn, int borderSizeIn) {
@@ -49,14 +52,64 @@ class Game {
 		return;
 	}
 	
+	method boolean isGameOver() {
+		var int snakeTop, snakeLeft, snakeRight, snakeBottom;
+		let snakeTop = snake.getHeadTop();
+		let snakeLeft = snake.getHeadLeft();
+		let snakeRight = snake.getHeadRight();
+		let snakeBottom = snake.getHeadBottom();
+		if (snakeTop < topLimit) { return true; }
+		if (snakeLeft < leftLimit) { return true; }
+		if (snakeRight > rightLimit) { return true; }
+		if (snakeBottom > bottomLimit) { return true; }
+		return false;
+	}
+	
+	/** Prompts for game start and seeds the game random */
+	method void waitGameStart() {
+		var int key, counter;
+		
+		do Output.printString("Press ENTER to start the game!");
+		
+		let counter = 0;
+		while (true) {
+			let key = Keyboard.keyPressed();
+			if (key = 128) { 
+				let rand = Random.new(counter);
+				return;
+			}
+			do Sys.wait(10);
+			let counter = counter + 1;
+		}
+		return;
+	}
+	
+	method void createFood() {
+		var int x, y, radius;
+		let radius = 5;
+		let x = rand.randRange(rightLimit - leftLimit - radius) + leftLimit + radius;
+		let y = rand.randRange(bottomLimit - topLimit - radius) + topLimit + radius;
+		let food = Food.new(x, y, radius);
+		let foodExists = true;
+		do food.draw();
+		return;
+	}
+	
 	method void startGame() {
 		var int counter, key;
+		var boolean isOver;
+		
+		let isOver = false;
+		let foodExists = false;
 	
+		do waitGameStart();
+		do Output.moveCursor(0, 0);
+		
 		do drawLimits();
 		do createSnake();
-
+		
 		do snake.draw();
-		while (true) {
+		while (~(isOver)) {
 		
 			let key = Keyboard.keyPressed();
 			if (key = 130) { do snake.setDirection(2);} // Left key
@@ -66,10 +119,17 @@ class Game {
 			
 			do snake.move();
 			do snake.draw();
-			//do snake.increaseSize();
 			
-			do Sys.wait(100);
+			if (~(foodExists)) {
+				do createFood();
+			}
+			
+			let isOver = isGameOver();
+			
+			do Sys.wait(120);
 		}
+		do Output.printString("Game Over!");
+		do Sys.wait(2000);
 		return;
 	}
 }
