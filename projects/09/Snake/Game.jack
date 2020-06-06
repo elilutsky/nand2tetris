@@ -46,6 +46,20 @@ class Game {
 		return;
 	}
 	
+	/** Returns true if the snake collides with the food */
+	method boolean detectFoodCollison() {
+		if (snake.doesCollide(food.getY() - food.getRadius() - 5, food.getY() + food.getRadius() + 5, food.getX() - food.getRadius() - 5, food.getX() + food.getRadius() + 5)) { return true; }
+		return false;
+	}
+	
+	method void handleFoodCollision() {
+		let score = score + 1;
+		let foodExists = false;
+		do food.erase();
+		do snake.increaseSize();
+		return;
+	}
+	
 	method boolean isGameOver() {
 		if (snake.doesCollide(0, topLimit, 0, screenWidth)) { return true; }
 		if (snake.doesCollide(0, screenHeight, 0, leftLimit)) { return true; }
@@ -121,6 +135,10 @@ class Game {
 			
 			if (~(foodExists)) {
 				do createFood();
+			}
+			
+			if (detectFoodCollison()) {
+				do handleFoodCollision();
 			}
 			
 			do drawGame();
