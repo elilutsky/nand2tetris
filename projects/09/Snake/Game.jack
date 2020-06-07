@@ -1,5 +1,6 @@
 class Game {
 	field int screenWidth, screenHeight, topLimit, bottomLimit, rightLimit, leftLimit, borderSize;
+	field int foodRadius;
 	field int score;
 	field Snake snake;
 	field Random rand;
@@ -7,7 +8,7 @@ class Game {
 	field Food food;
 
     /** Constructs a new Game object. */
-    constructor Game new(int screenWidthIn, int screenHeightIn, int borderSizeIn, int snakeBlockSize, int snakeStartX, int snakeStartY) {
+    constructor Game new(int screenWidthIn, int screenHeightIn, int borderSizeIn, int snakeBlockSize, int snakeStartX, int snakeStartY, int foodRadiusIn) {
 		let borderSize = borderSizeIn;
 		let screenWidth = screenWidthIn;
 		let screenHeight = screenHeightIn;
@@ -15,6 +16,7 @@ class Game {
         let bottomLimit = screenHeightIn - borderSize;
         let rightLimit = screenWidthIn - borderSize;
         let leftLimit = borderSize;
+		let foodRadius = foodRadiusIn;
 		let score = 0;
 		let snake = Snake.new(snakeBlockSize, snakeStartX, snakeStartY);
         return this;
@@ -30,11 +32,10 @@ class Game {
     }
 	
 	method void createFood() {
-		var int x, y, radius;
-		let radius = 5;
-		let x = rand.randRange(rightLimit - leftLimit - radius) + leftLimit + radius;
-		let y = rand.randRange(bottomLimit - topLimit - radius) + topLimit + radius;
-		let food = Food.new(x, y, radius);
+		var int x, y;
+		let x = rand.randRange(rightLimit - leftLimit - foodRadius) + leftLimit + foodRadius;
+		let y = rand.randRange(bottomLimit - topLimit - foodRadius) + topLimit + foodRadius;
+		let food = Food.new(x, y, foodRadius);
 		let foodExists = true;
 		do food.draw();
 		return;
