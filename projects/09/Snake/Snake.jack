@@ -128,16 +128,21 @@ class Snake {
 		let snakeRight = getHeadRight();
 		let snakeBottom = getHeadBottom();
 		
+		// Snake faces up
 		if ((snakeTop > top) & (snakeTop < bottom)) {
 			if (((snakeRight < right) & (snakeRight > left)) | ((snakeLeft < right) & (snakeLeft > left))) {
 				return true;
 			}
 		}
+		
+		// Snake faces down
 		if ((snakeBottom > top) & (snakeBottom < bottom)) {
 			if (((snakeRight < right) & (snakeRight > left)) | ((snakeLeft < right) & (snakeLeft > left))) {
 				return true;
 			}
 		}
+		
+		// When the snake is equal to the given area. Used to detect self collisions.
 		if ((snakeTop = top) & (snakeLeft = left) & (snakeRight = right) & (snakeBottom = bottom)) { return true; }
 		return false;
 	}

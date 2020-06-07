@@ -34,7 +34,7 @@ class Block {
     /** Erases the square from the screen. */
     method void erase() {
 		let isVisible = false;
-        do do drawByVisibility();
+        do drawByVisibility();
         return;
     }
 
