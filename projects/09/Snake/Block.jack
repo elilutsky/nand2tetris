@@ -17,20 +17,24 @@ class Block {
         do Memory.deAlloc(this);
         return;
     }
+	
+	method void drawByVisibility() {
+		do Screen.setColor(isVisible);
+        do Screen.drawRectangle(x, y, (x + size), (y + size));
+        return;
+	}
 
     /** Draws the square on the screen. */
     method void draw() {
 		let isVisible = true;
-        do Screen.setColor(true);
-        do Screen.drawRectangle(x, y, (x + size), (y + size));
+        do drawByVisibility();
         return;
     }
 
     /** Erases the square from the screen. */
     method void erase() {
 		let isVisible = false;
-        do Screen.setColor(false);
-        do Screen.drawRectangle(x, y, (x + size), (y + size));
+        do do drawByVisibility();
         return;
     }
 
