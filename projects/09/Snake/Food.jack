@@ -1,0 +1,34 @@
+class Food {
+    field int x, y, radius;
+    
+    constructor Food new(int xIn, int yIn, int radiusIn) {
+        let x = xIn;
+        let y = yIn;
+		let radius = radiusIn;
+        return this;
+    }
+	
+	method void draw() {
+		do Screen.setColor(true);
+        do Screen.drawCircle(x, y, radius);
+		return;
+	}
+	
+	method void erase() {
+		do Screen.setColor(false);
+        do Screen.drawCircle(x, y, radius);
+		return;
+	}
+	
+	/** Deallocates the object's memory. */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+	
+	/** Getters */
+	
+	method int getX() { return x; }
+	method int getY() { return y; }
+	method int getRadius() { return radius; }
+}

@@ -1,0 +1,16 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/09/List/Main.jack
+
+
+class Main {
+   function void main() {
+		var Game game;
+		let game = Game.new(511, 255, 25, 15, 200, 120, 5, 5);
+		do game.startGame();	
+		do game.dispose();
+		while (true) {}
+		return;
+   }
+}

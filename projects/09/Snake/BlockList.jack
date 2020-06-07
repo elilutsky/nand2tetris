@@ -1,0 +1,70 @@
+/** Represents a linked list of Block objects. */
+class BlockList {
+    field Block block;
+    field BlockList next;
+
+    /** Creates a List. */
+    constructor BlockList new(Block blockIn) {
+        let block = blockIn;
+        let next = null;
+        return this;
+    }
+
+    /** Deallocates this List by recursively disposing its tail. */
+    method void dispose() {
+        if (~(next = null)) {
+            do next.dispose();
+        }
+        do Memory.deAlloc(this);
+        return;
+    }
+	
+	/** Recursively draws all the blocks in the list. */
+	method void draw() {
+		do block.draw();
+		if (~(next = null)) {
+            do next.draw();
+        }
+        return;
+	}
+	
+	/** Appends the given Block at the end of the list */
+	method void appendBlock(Block blockIn) {
+		var BlockList newList;
+		let newList = BlockList.new(blockIn);
+		do appendBlockList(newList);
+		return;
+	}
+	
+	/** Appends the given BlockList at the end of the list */
+	method void appendBlockList(Block blockIn) {
+		if (next = null) {
+            let next = blockIn;
+			return;
+        }
+		do next.appendBlockList(blockIn);
+		return;
+	}
+	
+	/** Removes the last element from the list, returns it and erases the block. This
+		method expects the list to contain more that 1 element. */
+	method BlockList removeLast() {
+		var BlockList lastBlockList;
+		var Block lastBlock;
+
+		if (next.getNext() = null) {
+			let lastBlockList = next;
+			let lastBlock = next.getBlock();
+			do lastBlock.erase();
+			let next = null;
+            return lastBlockList;
+        }
+        return next.removeLast();
+	}
+
+    /** Getters */
+	
+    method Block getBlock() { return block; }
+    method List getNext() { return next; }
+
+}

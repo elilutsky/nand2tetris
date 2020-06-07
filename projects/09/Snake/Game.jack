@@ -1,0 +1,150 @@
+class Game {
+	field int screenWidth, screenHeight, topLimit, bottomLimit, rightLimit, leftLimit, borderSize;
+	field int foodRadius;
+	field int score;
+	field Snake snake;
+	field Random rand;
+	field boolean foodExists;
+	field Food food;
+
+    /** Constructs a new Game object. */
+    constructor Game new(int screenWidthIn, int screenHeightIn, int borderSizeIn, int snakeBlockSize, int snakeStartX, int snakeStartY, int foodRadiusIn, int blockDistanceIn) {
+		let borderSize = borderSizeIn;
+		let screenWidth = screenWidthIn;
+		let screenHeight = screenHeightIn;
+        let topLimit = borderSize;
+        let bottomLimit = screenHeightIn - borderSize;
+        let rightLimit = screenWidthIn - borderSize;
+        let leftLimit = borderSize;
+		let foodRadius = foodRadiusIn;
+		let score = 0;
+		let snake = Snake.new(snakeBlockSize, snakeStartX, snakeStartY, blockDistanceIn);
+        return this;
+    }
+
+    /** Deallocates the object's memory. */
+    method void dispose() {
+		do snake.dispose();
+		do rand.dispose();
+		do food.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+	
+	method void createFood() {
+		var int x, y;
+		let x = rand.randRange(rightLimit - leftLimit - foodRadius) + leftLimit + foodRadius;
+		let y = rand.randRange(bottomLimit - topLimit - foodRadius) + topLimit + foodRadius;
+		let food = Food.new(x, y, foodRadius);
+		let foodExists = true;
+		do food.draw();
+		return;
+	}
+	
+	/** Returns true if the snake collides with the food */
+	method boolean detectFoodCollison() {
+		if (snake.doesCollide(food.getY() - food.getRadius() - 5, food.getY() + food.getRadius() + 5, food.getX() - food.getRadius() - 5, food.getX() + food.getRadius() + 5)) {
+			return true; 
+		}
+		return false;
+	}
+	
+	method void handleFoodCollision() {
+		let score = score + 1;
+		let foodExists = false;
+		do food.erase();
+		do snake.increaseSize();
+		return;
+	}
+	
+	method boolean isGameOver() {
+		if (snake.doesCollide(0, topLimit, 0, screenWidth)) { return true; }
+		if (snake.doesCollide(0, screenHeight, 0, leftLimit)) { return true; }
+		if (snake.doesCollide(0, screenHeight, rightLimit, screenWidth)) { return true; }
+		if (snake.doesCollide(bottomLimit, screenHeight, 0, screenWidth)) { return true; }
+		return snake.doesCollideWithItself();
+	}
+	
+	/** Prompts for game start and seeds the game random */
+	method void waitGameStart() {
+		var int key, counter;
+		
+		do Output.printString("Press ENTER to start the game!");
+		
+		let counter = 0;
+		while (true) {
+			let key = Keyboard.keyPressed();
+			if (key = 128) { 
+				let rand = Random.new(counter);
+				return;
+			}
+			do Sys.wait(10);
+			let counter = counter + 1;
+		}
+		return;
+	}
+	
+	method void drawLimits() {
+		// Top limit
+		do Screen.drawRectangle(0, 0, screenWidth, topLimit);
+		// Left Limit
+		do Screen.drawRectangle(0, 0, leftLimit, screenHeight);
+		// Right Limit
+		do Screen.drawRectangle(rightLimit, 0, screenWidth, screenHeight);
+		// Bottom Limit
+		do Screen.drawRectangle(0, bottomLimit, screenWidth, screenHeight);
+		return;
+	}
+	
+	method void printScore() {
+		do Output.moveCursor(0, 0);
+		do Output.printString("Score: ");
+		do Output.printInt(score);
+		return;
+	}
+	
+	method void drawGame() {
+		do snake.draw();
+		do printScore();
+		return;
+	}
+	
+	method void startGame() {
+		var int counter, key;
+		var boolean isOver;
+		
+		let isOver = false;
+		let foodExists = false;
+	
+		do waitGameStart();
+		
+		do drawLimits();
+		do drawGame();
+		while (~(isOver)) {
+		
+			let key = Keyboard.keyPressed();
+			if (key = 130) { do snake.setDirection(2);} // Left key
+			if (key = 131) { do snake.setDirection(3);} // Up key
+			if (key = 132) { do snake.setDirection(1);} // Right key
+			if (key = 133) { do snake.setDirection(4);} // Down key
+			
+			if (~(foodExists)) {
+				do createFood();
+			}
+			
+			if (detectFoodCollison()) {
+				do handleFoodCollision();
+			}
+			
+			do snake.move();
+			
+			do drawGame();
+			
+			let isOver = isGameOver();
+			
+			do Sys.wait(120);
+		}
+		do Output.printString(" Game Over!");
+		return;
+	}
+}
