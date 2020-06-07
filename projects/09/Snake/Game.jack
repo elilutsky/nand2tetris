@@ -16,7 +16,7 @@ class Game {
         let rightLimit = screenWidthIn - borderSize;
         let leftLimit = borderSize;
 		let score = 0;
-		do createSnake();
+		let snake = Snake.new(15, 200, 120);
         return this;
     }
 
@@ -28,12 +28,6 @@ class Game {
         do Memory.deAlloc(this);
         return;
     }
-	
-	method void createSnake() {
-		let snake = Snake.new(15);
-		do snake.initBasicSnake(200, 120);
-		return;
-	}
 	
 	method void createFood() {
 		var int x, y, radius;

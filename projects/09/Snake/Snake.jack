@@ -5,9 +5,10 @@ class Snake {
 	field int direction;
 
     /** Creates a new snake. */
-    constructor Snake new(int blockSizeIn) {
+    constructor Snake new(int blockSizeIn, int startLocationX, int startLocationY) {
 		let blockSize = blockSizeIn;
 		let direction = 2;
+		do initBasicSnake(startLocationX, startLocationY);
         return this;
     }
 
