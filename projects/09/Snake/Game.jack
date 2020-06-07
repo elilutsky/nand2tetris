@@ -7,7 +7,7 @@ class Game {
 	field Food food;
 
     /** Constructs a new Game object. */
-    constructor Game new(int screenWidthIn, int screenHeightIn, int borderSizeIn) {
+    constructor Game new(int screenWidthIn, int screenHeightIn, int borderSizeIn, int snakeBlockSize, int snakeStartX, int snakeStartY) {
 		let borderSize = borderSizeIn;
 		let screenWidth = screenWidthIn;
 		let screenHeight = screenHeightIn;
@@ -16,7 +16,7 @@ class Game {
         let rightLimit = screenWidthIn - borderSize;
         let leftLimit = borderSize;
 		let score = 0;
-		let snake = Snake.new(15, 200, 120);
+		let snake = Snake.new(snakeBlockSize, snakeStartX, snakeStartY);
         return this;
     }
 
