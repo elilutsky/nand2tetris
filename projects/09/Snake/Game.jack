@@ -8,7 +8,7 @@ class Game {
 	field Food food;
 
     /** Constructs a new Game object. */
-    constructor Game new(int screenWidthIn, int screenHeightIn, int borderSizeIn, int snakeBlockSize, int snakeStartX, int snakeStartY, int foodRadiusIn) {
+    constructor Game new(int screenWidthIn, int screenHeightIn, int borderSizeIn, int snakeBlockSize, int snakeStartX, int snakeStartY, int foodRadiusIn, int blockDistanceIn) {
 		let borderSize = borderSizeIn;
 		let screenWidth = screenWidthIn;
 		let screenHeight = screenHeightIn;
@@ -18,7 +18,7 @@ class Game {
         let leftLimit = borderSize;
 		let foodRadius = foodRadiusIn;
 		let score = 0;
-		let snake = Snake.new(snakeBlockSize, snakeStartX, snakeStartY);
+		let snake = Snake.new(snakeBlockSize, snakeStartX, snakeStartY, blockDistanceIn);
         return this;
     }
 
@@ -43,7 +43,9 @@ class Game {
 	
 	/** Returns true if the snake collides with the food */
 	method boolean detectFoodCollison() {
-		if (snake.doesCollide(food.getY() - food.getRadius() - 5, food.getY() + food.getRadius() + 5, food.getX() - food.getRadius() - 5, food.getX() + food.getRadius() + 5)) { return true; }
+		if (snake.doesCollide(food.getY() - food.getRadius() - 5, food.getY() + food.getRadius() + 5, food.getX() - food.getRadius() - 5, food.getX() + food.getRadius() + 5)) {
+			return true; 
+		}
 		return false;
 	}
 	

@@ -1,13 +1,16 @@
 class Snake {
     field BlockList blockList;
 	field int blockSize;
+	// The distance between the different blocks
+	field int blockDistance;
 	// 1 = Right, 2 = Left, 3 = Up, 4 = Down
 	field int direction;
 
     /** Creates a new snake. */
-    constructor Snake new(int blockSizeIn, int startLocationX, int startLocationY) {
+    constructor Snake new(int blockSizeIn, int startLocationX, int startLocationY, int blockDistanceIn) {
 		let blockSize = blockSizeIn;
 		let direction = 2;
+		let blockDistance = blockDistanceIn;
 		do initBasicSnake(startLocationX, startLocationY);
         return this;
     }
@@ -22,8 +25,8 @@ class Snake {
 	method void initBasicSnake(int startLocationX, int startLocationY) {
 		var Block first, second, third;
 		let first = Block.new(startLocationX, startLocationY, blockSize);
-		let second = Block.new(startLocationX + blockSize + 5, startLocationY, blockSize);
-		let third = Block.new(startLocationX + (blockSize * 2) + 5, startLocationY, blockSize);
+		let second = Block.new(startLocationX + blockSize + blockDistance, startLocationY, blockSize);
+		let third = Block.new(startLocationX + (blockSize * 2) + blockDistance, startLocationY, blockSize);
 		let blockList = BlockList.new(first);
 		do blockList.appendBlock(second);
 		do blockList.appendBlock(third);
@@ -46,19 +49,19 @@ class Snake {
 		let firstBlock = blockList.getBlock();
 		
 		if (direction = 1) {
-			do lastBlock.setX(firstBlock.getX() + blockSize + 5);
+			do lastBlock.setX(firstBlock.getX() + blockSize + blockDistance);
 			do lastBlock.setY(firstBlock.getY());
 		}
 		if (direction = 2) {
-			do lastBlock.setX(firstBlock.getX() - blockSize - 5);
+			do lastBlock.setX(firstBlock.getX() - blockSize - blockDistance);
 			do lastBlock.setY(firstBlock.getY());
 		}
 		if (direction = 3) {
-			do lastBlock.setY(firstBlock.getY() - blockSize - 5);
+			do lastBlock.setY(firstBlock.getY() - blockSize - blockDistance);
 			do lastBlock.setX(firstBlock.getX());
 		}
 		if (direction = 4) {
-			do lastBlock.setY(firstBlock.getY() + blockSize + 5);
+			do lastBlock.setY(firstBlock.getY() + blockSize + blockDistance);
 			do lastBlock.setX(firstBlock.getX());
 		}
 		
