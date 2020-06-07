@@ -46,7 +46,7 @@ class BlockList {
 		return;
 	}
 	
-	/** Removes the last element from the list and erases the block. This
+	/** Removes the last element from the list, returns it and erases the block. This
 		method expects the list to contain more that 1 element. */
 	method BlockList removeLast() {
 		var BlockList lastBlockList;
