@@ -3,7 +3,7 @@ from enum import Enum
 from .base import JackToken
 
 
-class SymbolTypes(Enum):
+class JackSymbol(JackToken, Enum):
     LEFT_CURLY_BRACES = '{'
     RIGHT_CURLY_BRACES = '}'
     LEFT_BRACES = '('
@@ -25,19 +25,14 @@ class SymbolTypes(Enum):
     NOT = '~'
 
     @classmethod
-    def has_value(cls, value):
-        return value in set(item.value for item in cls)
-
-
-class JackSymbol(JackToken):
-
-    def __init__(self, word):
-        self._word = word
+    def get_starting_symbol(cls, value):
+        for symbol in cls:
+            if value.startswith(symbol.value):
+                return symbol
+        return None  # Explicit return for readability
 
     @staticmethod
-    def is_of_type(word):
-        return SymbolTypes.has_value(word)
+    def tokenize(word):
+        symbol = JackSymbol.get_starting_symbol(word)
+        return (symbol, word[1:]) if symbol else (None, word)
 
-    @property
-    def value(self):
-        return SymbolTypes(self._word)

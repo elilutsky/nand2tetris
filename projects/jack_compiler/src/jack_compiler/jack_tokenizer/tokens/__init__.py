@@ -1,2 +1,2 @@
-from .keyword import JackKeyword, KeywordTypes
-from .symbol import JackSymbol, SymbolTypes
+from .keyword import JackKeyword
+from .symbol import JackSymbol

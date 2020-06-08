@@ -1,12 +1,9 @@
 class JackToken:
 
     @staticmethod
-    def is_of_type(word):
+    def tokenize(word):
         """
-        Returns true if the given string is a valid token of the type.
+        Returns The token and the remainder. If the word cannot be tokenized by the object then the
+        returned value will be None, `word`.
         """
-        raise NotImplementedError()
-
-    @property
-    def value(self):
         raise NotImplementedError()

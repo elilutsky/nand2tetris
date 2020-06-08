@@ -3,7 +3,7 @@ from enum import Enum
 from .base import JackToken
 
 
-class KeywordTypes(Enum):
+class JackKeyword(JackToken, Enum):
     CLASS = 'class'
     CONSTRUCTOR = 'constructor'
     FUNCTION = 'function'
@@ -27,19 +27,16 @@ class KeywordTypes(Enum):
     RETURN = 'return'
 
     @classmethod
-    def has_value(cls, value):
-        return value in set(item.value for item in cls)
-
-
-class JackKeyword(JackToken):
-
-    def __init__(self, word):
-        self._word = word
+    def get_starting_keyword(cls, value):
+        for keyword in cls:
+            if value.startswith(keyword.value):
+                return keyword
+        return None  # Explicit return for readability
 
     @staticmethod
-    def is_of_type(word):
-        return KeywordTypes.has_value(word)
-
-    @property
-    def value(self):
-        return KeywordTypes(self._word)
+    def tokenize(word):
+        keyword = JackKeyword.get_starting_keyword(word)
+        if keyword:
+            return keyword, word[len(keyword.value):]
+        else:
+            return None, word

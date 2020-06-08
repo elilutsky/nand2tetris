@@ -1,6 +1,6 @@
-from .tokens import JackKeyword
+from .tokens import JackKeyword, JackSymbol
 
-_TOKEN_TYPES = [JackKeyword]
+_TOKEN_TYPES = [JackKeyword, JackSymbol]
 
 
 def tokenize(f):
@@ -21,9 +21,13 @@ class Tokenizer:
 
     def _tokenize_line(self, line):
         for word in line.split():
-            yield self._tokenize_word(word)
+            yield from self._tokenize_word(word)
 
     def _tokenize_word(self, word):
         for token_type in _TOKEN_TYPES:
-            if token_type.is_of_type(word):
-                return token_type(word)
+            token, remainder = token_type.tokenize(word)
+            if token:
+                yield token
+                if remainder:
+                    yield from self._tokenize_word(remainder)
+                return
