@@ -8,7 +8,7 @@ _POSSIBLE_KEYWORDS = ['class', 'constructor', 'function', 'method',
 
 class JackKeyword(JackToken):
 
-    def __int__(self, word):
+    def __init__(self, word):
         self._word = word
 
     @staticmethod
