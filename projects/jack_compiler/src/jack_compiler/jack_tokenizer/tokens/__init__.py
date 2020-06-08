@@ -1,1 +1,1 @@
-from .keyword import JackKeyword
+from .keyword import JackKeyword, KeywordTypes

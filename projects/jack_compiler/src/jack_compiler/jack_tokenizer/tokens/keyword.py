@@ -1,9 +1,34 @@
+from enum import Enum
+
 from .base import JackToken
 
-_POSSIBLE_KEYWORDS = ['class', 'constructor', 'function', 'method',
-                      'field', 'static', 'var', 'int', 'char', 'boolean',
-                      'void', 'true', 'false', 'null', 'this', 'let', 'do',
-                      'if', 'else', 'while', 'return']
+
+class KeywordTypes(Enum):
+    CLASS = 'class'
+    CONSTRUCTOR = 'constructor'
+    FUNCTION = 'function'
+    METHOD = 'method'
+    FIELD = 'field'
+    STATIC = 'static'
+    VAR = 'var'
+    INT = 'int'
+    CHAR = 'char'
+    BOOLEAN = 'boolean'
+    VOID = 'void'
+    TRUE = 'true'
+    FALSE = 'false'
+    NULL = 'null'
+    THIS = 'this'
+    LET = 'let'
+    DO = 'do'
+    IF = 'if'
+    ELSE = 'else'
+    WHILE = 'while'
+    RETURN = 'return'
+
+    @classmethod
+    def has_value(cls, value):
+        return value in set(item.value for item in cls)
 
 
 class JackKeyword(JackToken):
@@ -13,8 +38,8 @@ class JackKeyword(JackToken):
 
     @staticmethod
     def is_of_type(word):
-        return word in _POSSIBLE_KEYWORDS
+        return KeywordTypes.has_value(word)
 
     @property
     def value(self):
-        return self._word
+        return KeywordTypes(self._word)
