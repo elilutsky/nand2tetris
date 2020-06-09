@@ -1,5 +1,6 @@
+from pathlib import Path
 from parametrization import Parametrization
-from jack_compiler.jack_tokenizer.tokenizer import Tokenizer
+from jack_compiler.jack_tokenizer.tokenizer import Tokenizer, tokenize_to_xml
 from jack_compiler.jack_tokenizer.tokens import JackKeyword, JackSymbol, JackDecimal, JackIdentifier
 
 
@@ -12,3 +13,17 @@ from jack_compiler.jack_tokenizer.tokens import JackKeyword, JackSymbol, JackDec
 def test_tokenize_line(test_subject, expected_tokens):
     tokenizer = Tokenizer('/dummy/path')
     assert [token for token in tokenizer._tokenize_line(test_subject)] == expected_tokens
+
+
+def test_tokenize_to_xml():
+    parent_dir = Path(__file__).parent
+    input_ = Path(f'{parent_dir}/files/input.jack')
+
+    tokenize_to_xml(input_)
+
+    output = input_.with_suffix('.xml')
+    expected = Path(f'{parent_dir}/files/expected.xml')
+
+    assert output.read_text() == expected.read_text()
+
+    output.unlink()
