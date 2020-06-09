@@ -1,3 +1,4 @@
+import re
 from enum import Enum
 
 from .base import JackToken
@@ -25,14 +26,8 @@ class JackSymbol(JackToken, Enum):
     NOT = '~'
 
     @classmethod
-    def get_starting_symbol(cls, value):
-        for symbol in cls:
-            if value.startswith(symbol.value):
-                return symbol
-        return None  # Explicit return for readability
-
-    @classmethod
-    def tokenize(cls, word) -> ('JackSymbol', str):
-        symbol = JackSymbol.get_starting_symbol(word)
-        return (symbol, word[1:]) if symbol else (None, word)
-
+    def _get_token_regex(cls):
+        return re.compile(f'^(\{cls.LEFT_CURLY_BRACES}|\{cls.RIGHT_CURLY_BRACES}|\{cls.LEFT_BRACES}|'
+                          f'\{cls.RIGHT_BRACES}|\{cls.LEFT_SQUARE_BRACES}|\{cls.RIGHT_SQUARE_BRACES}|\{cls.DOT}|\{cls.COMMA}|\{cls.SEMICOLON}|'
+                          f'\{cls.PLUS}|\{cls.MINUS}|\{cls.MULT}|\{cls.DIV}|\{cls.AND}|\{cls.OR}|\{cls.LOWER}|\{cls.GREATER}|'
+                          f'\{cls.EQUAL}|\{cls.NOT})')
