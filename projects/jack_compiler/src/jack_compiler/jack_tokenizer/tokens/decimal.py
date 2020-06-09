@@ -30,3 +30,6 @@ class JackDecimal(JackToken):
 
     def __eq__(self, other: 'JackDecimal'):
         return self.value == other.value
+
+    def __repr__(self):
+        return f'<JackDeciaml.NUMBER: \'{self.value}\'>'
