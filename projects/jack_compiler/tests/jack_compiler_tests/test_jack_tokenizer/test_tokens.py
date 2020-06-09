@@ -1,6 +1,6 @@
 from parametrization import Parametrization
 
-from jack_compiler.jack_tokenizer.tokens import JackKeyword, JackSymbol, JackDecimal, JackString
+from jack_compiler.jack_tokenizer.tokens import JackKeyword, JackSymbol, JackDecimal, JackString, JackIdentifier
 
 
 @Parametrization.parameters('keyword_type', 'test_subject', 'expected')
@@ -22,5 +22,13 @@ from jack_compiler.jack_tokenizer.tokens import JackKeyword, JackSymbol, JackDec
 @Parametrization.case('String valid word', JackString, '"32000abc"', (JackString('32000abc'), ''))
 @Parametrization.case('String valid word', JackString, '""asd', (JackString(''), 'asd'))
 @Parametrization.case('String invalid word', JackString, '"test', (None, '"test'))
+@Parametrization.case('Identifier valid word', JackIdentifier, 'pasten', (JackIdentifier('pasten'), ''))
+@Parametrization.case('Identifier valid word', JackIdentifier, 'pasten_pastenino', (JackIdentifier('pasten_pastenino'), ''))
+@Parametrization.case('Identifier valid word', JackIdentifier, 'pasten_pastenino123', (JackIdentifier('pasten_pastenino123'), ''))
+@Parametrization.case('Identifier valid word', JackIdentifier, 'pasten_Pastenino123', (JackIdentifier('pasten_Pastenino123'), ''))
+@Parametrization.case('Identifier valid word', JackIdentifier, 'pasten_Pastenino123;', (JackIdentifier('pasten_Pastenino123'), ';'))
+@Parametrization.case('Identifier valid word', JackIdentifier, '_Pastenino123;', (JackIdentifier('_Pastenino123'), ';'))
+@Parametrization.case('Identifier invalid word', JackIdentifier, '123pasten', (None, '123pasten'))
+@Parametrization.case('Identifier invalid word', JackIdentifier, '&^%pasd_asd', (None, '&^%pasd_asd'))
 def test_tokenize(keyword_type, test_subject, expected):
     assert keyword_type.tokenize(test_subject) == expected

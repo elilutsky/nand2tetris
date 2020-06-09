@@ -2,7 +2,7 @@ import re
 
 from .base import JackToken
 
-_DECIMAL_RANGE_REGEX = re.compile(r'\"(\w*)\"', re.UNICODE)
+_STRING_REGEX = re.compile(r'\"(\w*)\"', re.UNICODE)
 
 
 class JackString(JackToken):
@@ -12,7 +12,7 @@ class JackString(JackToken):
 
     @staticmethod
     def tokenize(word) -> ('JackString', str):
-        match = _DECIMAL_RANGE_REGEX.match(word)
+        match = _STRING_REGEX.match(word)
         if match:
             return JackString(match.group(1)), word[len(match.group(0)):]
         else:
@@ -26,4 +26,4 @@ class JackString(JackToken):
         return self.value == other.value
 
     def __repr__(self):
-        return f'<JackDeciaml.STRING: \'{self.value}\'>'
+        return f'<JackString.STRING: \'{self.value}\'>'
