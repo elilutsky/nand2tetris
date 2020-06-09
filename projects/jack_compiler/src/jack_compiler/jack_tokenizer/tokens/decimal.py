@@ -20,7 +20,7 @@ class JackDecimal(JackToken):
     def tokenize(word) -> ('JackDecimal', str):
         match = _DECIMAL_RANGE_REGEX.match(word)
         if match:
-            return JackDecimal(match.group(1)), word[len(match.group(1)):]
+            return JackDecimal(match.group(1)), word[len(match.group(0)):]
         else:
             return None, word
 

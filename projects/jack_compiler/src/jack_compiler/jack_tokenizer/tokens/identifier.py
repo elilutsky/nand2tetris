@@ -14,7 +14,7 @@ class JackIdentifier(JackToken):
     def tokenize(word) -> ('JackIdentifier', str):
         match = _IDENTIFIER_REGEX.match(word)
         if match:
-            return JackIdentifier(match.group(1)), word[len(match.group(1)):]
+            return JackIdentifier(match.group(1)), word[len(match.group(0)):]
         else:
             return None, word
 
