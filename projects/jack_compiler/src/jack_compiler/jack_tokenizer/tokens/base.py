@@ -1,9 +1,28 @@
 class JackToken:
 
-    @staticmethod
-    def tokenize(word) -> ('JackToken', str):
+    _TOKEN_REGEX = None
+
+    def __init__(self, token_value):
+        self._token_value = token_value
+
+    @classmethod
+    def tokenize(cls, word) -> ('JackToken', str):
         """
         Returns The token and the remainder. If the word cannot be tokenized by the object then the
         returned value will be None, `word`.
         """
-        raise NotImplementedError()
+        match = cls._TOKEN_REGEX.match(word)
+        if match:
+            return cls(match.group(1)), word[len(match.group(0)):]
+        else:
+            return None, word
+
+    @property
+    def value(self):
+        return self._token_value
+
+    def __eq__(self, other: 'JackToken'):
+        return self.__class__ == other.__class__ and self.value == other.value
+
+    def __repr__(self):
+        return f'<{self.__class__}: \'{self.value}\'>'
