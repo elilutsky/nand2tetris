@@ -1,6 +1,6 @@
 from parametrization import Parametrization
 
-from jack_compiler.jack_tokenizer.tokens import JackKeyword, JackSymbol, JackDecimal
+from jack_compiler.jack_tokenizer.tokens import JackKeyword, JackSymbol, JackDecimal, JackString
 
 
 @Parametrization.parameters('keyword_type', 'test_subject', 'expected')
@@ -19,5 +19,8 @@ from jack_compiler.jack_tokenizer.tokens import JackKeyword, JackSymbol, JackDec
 @Parametrization.case('Decimal valid word', JackDecimal, '9999', (JackDecimal('9999'), ''))
 @Parametrization.case('Decimal valid word', JackDecimal, '99999', (JackDecimal('9999'), '9'))
 @Parametrization.case('Decimal valid word', JackDecimal, '32000abc', (JackDecimal('32000'), 'abc'))
+@Parametrization.case('String valid word', JackString, '"32000abc"', (JackString('32000abc'), ''))
+@Parametrization.case('String valid word', JackString, '""asd', (JackString(''), 'asd'))
+@Parametrization.case('String invalid word', JackString, '"test', (None, '"test'))
 def test_tokenize(keyword_type, test_subject, expected):
     assert keyword_type.tokenize(test_subject) == expected
