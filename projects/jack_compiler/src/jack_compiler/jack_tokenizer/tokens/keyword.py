@@ -1,3 +1,4 @@
+import re
 from enum import Enum
 
 from .base import JackToken
@@ -27,16 +28,7 @@ class JackKeyword(JackToken, Enum):
     RETURN = 'return'
 
     @classmethod
-    def get_starting_keyword(cls, value):
-        for keyword in cls:
-            if value.startswith(keyword.value):
-                return keyword
-        return None  # Explicit return for readability
-
-    @classmethod
-    def tokenize(cls, word) -> ('JackKeyword', str):
-        keyword = JackKeyword.get_starting_keyword(word)
-        if keyword:
-            return keyword, word[len(keyword.value):]
-        else:
-            return None, word
+    def _get_token_regex(cls):
+        return re.compile(f'^({cls.CLASS}|{cls.CONSTRUCTOR}|{cls.FUNCTION}|{cls.METHOD}|{cls.FIELD}|{cls.STATIC}|'
+                          f'{cls.VAR}|{cls.INT}|{cls.CHAR}|{cls.BOOLEAN}|{cls.VOID}|{cls.TRUE}|{cls.FALSE}|{cls.NULL}|'
+                          f'{cls.THIS}|{cls.LET}|{cls.DO}|{cls.IF}|{cls.ELSE}|{cls.WHILE}|{cls.RETURN})')

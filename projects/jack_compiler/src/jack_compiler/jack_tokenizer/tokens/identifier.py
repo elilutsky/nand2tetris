@@ -4,4 +4,6 @@ from .base import JackToken
 
 
 class JackIdentifier(JackToken):
-    _TOKEN_REGEX = re.compile(r'^([^\d\W][\w_]*)')
+    @classmethod
+    def _get_token_regex(cls):
+        return re.compile(r'^([^\d\W][\w_]*)')

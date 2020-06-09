@@ -4,4 +4,7 @@ from .base import JackToken
 
 
 class JackString(JackToken):
-    _TOKEN_REGEX = re.compile(r'\"(\w*)\"', re.UNICODE)
+
+    @classmethod
+    def _get_token_regex(cls):
+        return re.compile(r'\"(\w*)\"', re.UNICODE)
