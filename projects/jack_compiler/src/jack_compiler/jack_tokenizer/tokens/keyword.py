@@ -34,7 +34,7 @@ class JackKeyword(JackToken, Enum):
         return None  # Explicit return for readability
 
     @staticmethod
-    def tokenize(word):
+    def tokenize(word) -> ('JackKeyword', str):
         keyword = JackKeyword.get_starting_keyword(word)
         if keyword:
             return keyword, word[len(keyword.value):]

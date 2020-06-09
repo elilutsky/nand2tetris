@@ -32,7 +32,7 @@ class JackSymbol(JackToken, Enum):
         return None  # Explicit return for readability
 
     @staticmethod
-    def tokenize(word):
+    def tokenize(word) -> ('JackSymbol', str):
         symbol = JackSymbol.get_starting_symbol(word)
         return (symbol, word[1:]) if symbol else (None, word)
 

@@ -1,6 +1,6 @@
-from .tokens import JackKeyword, JackSymbol
+from .tokens import JackKeyword, JackSymbol, JackDecimal
 
-_TOKEN_TYPES = [JackKeyword, JackSymbol]
+_TOKEN_TYPES = [JackKeyword, JackSymbol, JackDecimal]
 
 
 def tokenize(f):
