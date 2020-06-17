@@ -1,14 +1,14 @@
 from parametrization import Parametrization
 
-from jack_compiler.jack_tokenizer.tokens import JackKeyword, JackSymbol, JackDecimal, JackString, JackIdentifier
+from jack_compiler.jack_tokenizer.tokens import JackKeyword, JackSymbol, JackDecimal, JackString, JackIdentifier, JackAlphanumeric
 
 
 @Parametrization.parameters('keyword_type', 'test_subject', 'expected')
-@Parametrization.case('Keyword valid word', JackKeyword, 'return', (JackKeyword.RETURN, ''))
-@Parametrization.case('Keyword valid word', JackKeyword, 'returnpasten', (JackKeyword.RETURN, 'pasten'))
-@Parametrization.case('Keyword valid word', JackKeyword, 'function', (JackKeyword.FUNCTION, ''))
-@Parametrization.case('Keyword invalid word', JackKeyword, 'nlul', (None, 'nlul'))
-@Parametrization.case('Keyword invalid word', JackKeyword, 'retrun', (None, 'retrun'))
+@Parametrization.case('Keyword valid word', JackAlphanumeric, 'return', (JackKeyword.RETURN, ''))
+@Parametrization.case('Keyword invalid word', JackAlphanumeric, 'returnpasten', (None, 'returnpasten'))
+@Parametrization.case('Keyword valid word', JackAlphanumeric, 'function', (JackKeyword.FUNCTION, ''))
+@Parametrization.case('Keyword invalid word', JackAlphanumeric, 'nlul', (None, 'nlul'))
+@Parametrization.case('Keyword invalid word', JackAlphanumeric, 'retrun', (None, 'retrun'))
 @Parametrization.case('Symbol valid word', JackSymbol, '*', (JackSymbol.MULT, ''))
 @Parametrization.case('Symbol valid word', JackSymbol, '*hello', (JackSymbol.MULT, 'hello'))
 @Parametrization.case('Symbol valid word', JackSymbol, '{', (JackSymbol.LEFT_CURLY_BRACES, ''))
