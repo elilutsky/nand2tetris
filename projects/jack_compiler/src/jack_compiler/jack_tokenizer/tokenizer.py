@@ -31,8 +31,19 @@ class Tokenizer:
 
     def __iter__(self):
         with open(self._file_path, 'r') as input_:
-            for line in input_:
+            for line in self._skip_multiline_comments(input_):
                 yield from self._tokenize_line(line)
+
+    def _skip_multiline_comments(self, f):
+        while True:
+            line = f.readline()
+            if not line:
+                return
+            if line.strip().startswith('/**'):
+                while not line.strip().endswith('*/'):
+                    line = f.readline()
+                line = f.readline()
+            yield line
 
     def _tokenize_line(self, line):
         for word in line.split():
