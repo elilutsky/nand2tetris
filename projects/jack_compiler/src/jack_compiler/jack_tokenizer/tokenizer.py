@@ -2,10 +2,10 @@ from pathlib import Path
 
 from xml.etree.ElementTree import Element, tostring
 
-from .tokens import JackAlphanumeric, JackSymbol, JackString, JackIdentifier
+from .tokens import JackSkip, JackAlphanumeric, JackSymbol, JackString, JackIdentifier
 from .tokens.utils import CLASS_TO_XML_TAG
 
-_TOKEN_TYPES = [JackAlphanumeric, JackSymbol, JackString, JackIdentifier]
+_TOKEN_TYPES = [JackSkip, JackAlphanumeric, JackSymbol, JackString, JackIdentifier]
 
 
 def tokenize_to_xml(f):
@@ -46,14 +46,12 @@ class Tokenizer:
             yield line
 
     def _tokenize_line(self, line):
-        for word in line.split():
-            yield from self._tokenize_word(word)
-
-    def _tokenize_word(self, word):
         for token_type in _TOKEN_TYPES:
-            token, remainder = token_type.tokenize(word)
+            token, remainder = token_type.tokenize(line)
             if token:
-                yield token
+                if not isinstance(token, JackSkip):
+                    yield token
                 if remainder:
-                    yield from self._tokenize_word(remainder)
+                    yield from self._tokenize_line(remainder)
                 return
+

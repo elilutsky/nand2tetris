@@ -21,6 +21,7 @@ from jack_compiler.jack_tokenizer.tokens import JackKeyword, JackSymbol, JackDec
 @Parametrization.case('Decimal valid word', JackAlphanumeric, '30000', (JackDecimal('30000'), ''))
 @Parametrization.case('Decimal valid word', JackAlphanumeric, '33000', (None, '33000'))
 @Parametrization.case('String valid word', JackString, '"32000abc"', (JackString('32000abc'), ''))
+@Parametrization.case('String valid word', JackString, '"32000 abc"', (JackString('32000 abc'), ''))
 @Parametrization.case('String valid word', JackString, '""asd', (JackString(''), 'asd'))
 @Parametrization.case('String invalid word', JackString, '"test', (None, '"test'))
 @Parametrization.case('Identifier valid word', JackIdentifier, 'pasten', (JackIdentifier('pasten'), ''))
