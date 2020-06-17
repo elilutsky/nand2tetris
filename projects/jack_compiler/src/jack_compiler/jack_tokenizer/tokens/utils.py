@@ -1,6 +1,6 @@
 from .alphanumeric import JackKeyword
+from .alphanumeric import JackDecimal
 from .symbol import JackSymbol
-from .decimal import JackDecimal
 from .string import JackString
 from .identifier import JackIdentifier
 

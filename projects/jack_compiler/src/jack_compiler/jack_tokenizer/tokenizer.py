@@ -2,10 +2,10 @@ from pathlib import Path
 
 from xml.etree.ElementTree import Element, tostring
 
-from .tokens import JackAlphanumeric, JackSymbol, JackDecimal, JackString, JackIdentifier
+from .tokens import JackAlphanumeric, JackSymbol, JackString, JackIdentifier
 from .tokens.utils import CLASS_TO_XML_TAG
 
-_TOKEN_TYPES = [JackAlphanumeric, JackSymbol, JackDecimal, JackString, JackIdentifier]
+_TOKEN_TYPES = [JackAlphanumeric, JackSymbol, JackString, JackIdentifier]
 
 
 def tokenize_to_xml(f):

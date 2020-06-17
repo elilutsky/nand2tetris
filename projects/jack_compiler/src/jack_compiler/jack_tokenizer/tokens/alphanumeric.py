@@ -35,6 +35,10 @@ class JackKeyword(Enum):
         return self.value == other.value
 
 
+class JackDecimal(JackToken):
+    pass
+
+
 class JackAlphanumeric(JackToken):
 
     @classmethod
@@ -48,4 +52,7 @@ class JackAlphanumeric(JackToken):
             return None, word
         if JackKeyword.does_exist(token.value):
             return JackKeyword(token.value), remainder
+        if token.value.isnumeric() and 0 <= int(token.value) < 32768:
+            return JackDecimal(token.value), remainder
+
         return None, word
