@@ -6,6 +6,7 @@ from jack_compiler.jack_tokenizer.tokens import JackKeyword, JackSymbol, JackDec
 @Parametrization.parameters('keyword_type', 'test_subject', 'expected')
 @Parametrization.case('Keyword valid word', JackAlphanumeric, 'return', (JackKeyword.RETURN, ''))
 @Parametrization.case('Keyword invalid word', JackAlphanumeric, 'returnpasten', (None, 'returnpasten'))
+@Parametrization.case('Identifier valid word', JackIdentifier, 'returnpasten', (JackIdentifier('returnpasten'), ''))
 @Parametrization.case('Keyword valid word', JackAlphanumeric, 'function', (JackKeyword.FUNCTION, ''))
 @Parametrization.case('Keyword invalid word', JackAlphanumeric, 'nlul', (None, 'nlul'))
 @Parametrization.case('Keyword invalid word', JackAlphanumeric, 'retrun', (None, 'retrun'))
