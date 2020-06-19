@@ -2,10 +2,10 @@ from pathlib import Path
 
 from xml.etree.ElementTree import Element, tostring
 
-from .tokens import JackKeyword, JackSymbol, JackDecimal, JackString, JackIdentifier
+from .tokens import JackSkip, JackAlphanumeric, JackSymbol, JackString, JackIdentifier
 from .tokens.utils import CLASS_TO_XML_TAG
 
-_TOKEN_TYPES = [JackKeyword, JackSymbol, JackDecimal, JackString, JackIdentifier]
+_TOKEN_TYPES = [JackSkip, JackAlphanumeric, JackSymbol, JackString, JackIdentifier]
 
 
 def tokenize_to_xml(f):
@@ -31,18 +31,27 @@ class Tokenizer:
 
     def __iter__(self):
         with open(self._file_path, 'r') as input_:
-            for line in input_:
+            for line in self._skip_multiline_comments(input_):
                 yield from self._tokenize_line(line)
 
-    def _tokenize_line(self, line):
-        for word in line.split():
-            yield from self._tokenize_word(word)
-
-    def _tokenize_word(self, word):
-        for token_type in _TOKEN_TYPES:
-            token, remainder = token_type.tokenize(word)
-            if token:
-                yield token
-                if remainder:
-                    yield from self._tokenize_word(remainder)
+    def _skip_multiline_comments(self, f):
+        while True:
+            line = f.readline()
+            if not line:
                 return
+            if line.strip().startswith('/**'):
+                while not line.strip().endswith('*/'):
+                    line = f.readline()
+                line = f.readline()
+            yield line
+
+    def _tokenize_line(self, line):
+        for token_type in _TOKEN_TYPES:
+            token, remainder = token_type.tokenize(line)
+            if token:
+                if not isinstance(token, JackSkip):
+                    yield token
+                if remainder:
+                    yield from self._tokenize_line(remainder)
+                return
+

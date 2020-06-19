@@ -3,6 +3,7 @@ class Square {
    field int x, y;
    field int size;
 
+    /** test */
    constructor Square new(int Ax, int Ay, int Asize) {
       let x = Ax;
       let y = Ay;
@@ -11,8 +12,12 @@ class Square {
       return this;
    }
 
+   /**
+   test
+   */
    method void dispose() {
-      do Memory.deAlloc(this);
+      // test
+      do Memory.deAlloc(this); // test
       return;
    }
 

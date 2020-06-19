@@ -3,8 +3,7 @@ import re
 from .base import JackToken
 
 
-class JackString(JackToken):
-
+class JackSkip(JackToken):
     @classmethod
     def _get_token_regex(cls):
-        return re.compile(r'\"([^\"]*)\"', re.UNICODE)
+        return re.compile(r'^(//.*)|^(\s+)')
