@@ -1,10 +1,8 @@
-from pathlib import Path
 
 from .jack_tokenizer import tokenize
-from xml.etree.ElementTree import Element, tostring
 
-from .jack_tokenizer.tokens import JackKeyword, JackSymbol, JackDecimal, JackString, JackIdentifier
-from .jack_tokenizer.tokens.utils import CLASS_TO_XML_TAG
+from .jack_tokenizer.tokens import JackKeyword, JackSymbol
+from .jack_tokenizer.tokens.utils import write_token_to_xml_output
 
 
 class Parser:
@@ -17,12 +15,25 @@ class Parser:
         self._pre_read_token = None
 
     def parse(self):
-        for token in self._tokenizer:
-            self._current_token = token
-            e = Element(CLASS_TO_XML_TAG[token.__class__])
-            e.text = f' {token.value} '
-            output.write(tostring(e).decode('utf-8') + '\n')
-        output.write('</tokens>\n')
+        self._compile_class()
+
+    def write_xml_tag(self, tag_name):
+        def decorator(compile_function):
+            def wrapper():
+                self._write_open_xml_tag(tag_name)
+                ret = compile_function()
+                self._write_close_xml_tag(tag_name)
+                return ret
+
+            return wrapper
+
+        return decorator
+
+    def _write_open_xml_tag(self, rule_name):
+        self._output_file.write(f'<{rule_name}>\n')
+
+    def _write_close_xml_tag(self, rule_name):
+        self._output_file.write(f'</{rule_name}>\n')
 
     def _next_token(self):
         if self._pre_read_token is not None:
@@ -43,25 +54,31 @@ class Parser:
         if self._token.value != expected_token_value:
             raise Exception(f'Expected token: {expected_token_value} but got {self._token.value}')
 
-        # todo, write self._token
+        write_token_to_xml_output(self._token, self._output_file)
 
     def _compile_token(self):
         self._next_token()
 
-        # todo, write self._token
+        write_token_to_xml_output(self._token, self._output_file)
 
+    @write_xml_tag('class')
     def _compile_class(self):
+        self._write_open_xml_tag('class')
         self._compile_expected_token(JackKeyword.CLASS)
+        # className
+        self._compile_token()
         self._compile_expected_token(JackSymbol.LEFT_CURLY_BRACES)
         self._compile_class_var_dec()
         self._compile_subroutine_dec()
         self._compile_expected_token(JackSymbol.RIGHT_CURLY_BRACES)
+        self._write_close_xml_tag('class')
 
+    @write_xml_tag('classVarDec')
     def _compile_class_var_dec(self):
+        self._write_open_xml_tag('classVarDec')
 
         # match zero or more
-        next_token = self._peek_token()
-        while next_token.value in [JackKeyword.STATIC, JackKeyword.FIELD]:
+        while self._peek_token().value in [JackKeyword.STATIC, JackKeyword.FIELD]:
             # static | field
             self._compile_token()
 
@@ -82,15 +99,17 @@ class Parser:
                 next_token = self._peek_token()
 
             self._compile_expected_token(JackSymbol.SEMICOLON)
-            next_token = self._peek_token()
 
+        self._write_close_xml_tag('classVarDec')
+
+    @write_xml_tag('subroutineDec')
     def _compile_subroutine_dec(self):
+        self._write_open_xml_tag('subroutineDec')
 
         # match zero or more
-        next_token = self._peek_token()
-        while next_token in [JackKeyword.CONSTRUCTOR,
-                             JackKeyword.FUNCTION,
-                             JackKeyword.METHOD]:
+        while self._peek_token() in [JackKeyword.CONSTRUCTOR,
+                                     JackKeyword.FUNCTION,
+                                     JackKeyword.METHOD]:
 
             # constructor | function | method
             self._compile_token()
@@ -98,7 +117,7 @@ class Parser:
             # void | type
             self._compile_token()
 
-            # subroutineName: identifier
+            # subroutineName
             self._compile_token()
 
             self._compile_expected_token(JackSymbol.LEFT_BRACES)
@@ -106,37 +125,44 @@ class Parser:
             self._compile_expected_token(JackSymbol.RIGHT_BRACES)
             self._compile_subroutine_body()
 
-            next_token = self._peek_token()
+        self._write_close_xml_tag('subroutineDec')
 
+    @write_xml_tag('parameterList')
     def _compile_parameter_list(self):
-        next_token = self._peek_token()
+        self._write_open_xml_tag('parameterList')
 
-        while next_token.value != JackSymbol.RIGHT_BRACES:
+        while self._peek_token().value != JackSymbol.RIGHT_BRACES:
             # type
             self._compile_token()
 
             # varName
             self._compile_token()
 
-            next_token = self._peek_token()
-            if next_token.value == JackSymbol.COMMA:
+            if self._peek_token().value == JackSymbol.COMMA:
                 self._compile_token()
-                next_token = self._peek_token()
             else:
-                assert next_token.value == JackSymbol.RIGHT_BRACES, \
-                    f"unexpected token {next_token.value} encountered in parameter list"
+                assert self._peek_token().value == JackSymbol.RIGHT_BRACES, \
+                    f"unexpected token {self._peek_token().value} encountered in parameter list"
 
+        self._write_close_xml_tag('parameterList')
+
+    @write_xml_tag('subroutineBody')
     def _compile_subroutine_body(self):
+        self._write_open_xml_tag('subroutineBody')
+
         self._compile_expected_token(JackSymbol.LEFT_CURLY_BRACES)
         self._compile_var_dec()
         self._compile_statements()
         self._compile_expected_token(JackSymbol.RIGHT_CURLY_BRACES)
+        self._write_close_xml_tag('subroutineBody')
 
+    @write_xml_tag('varDec')
     def _compile_var_dec(self):
+        self._write_open_xml_tag('varDec')
+
         # match zero or more
 
-        next_token = self._peek_token()
-        while next_token.value == JackKeyword.VAR:
+        while self._peek_token().value == JackKeyword.VAR:
             # var
             self._compile_token()
 
@@ -146,21 +172,21 @@ class Parser:
             # varName
             self._compile_token()
 
-            next_token = self._peek_token()
-            while next_token.value == JackSymbol.COMMA:
+            while self._peek_token().value == JackSymbol.COMMA:
                 # comma
                 self._compile_token()
 
                 # varName
                 self._compile_token()
 
-                next_token = self._peek_token()
-
             self._compile_expected_token(JackSymbol.SEMICOLON)
 
-            next_token = self._peek_token()
+        self._write_close_xml_tag('varDec')
 
+    @write_xml_tag('statements')
     def _compile_statements(self):
+        self._write_open_xml_tag('statements')
+
         while True:
             next_token = self._peek_token()
 
@@ -175,18 +201,20 @@ class Parser:
             elif next_token.value == JackKeyword.RETURN:
                 self._compile_return()
             else:
-                assert next_token.value == JackSymbol.RIGHT_CURLY_BRACES,\
-                    "Unexpected token in statement: {next_token.value}"
                 break
 
+        self._write_close_xml_tag('statements')
+
+    @write_xml_tag('letStatement')
     def _compile_let(self):
+        self._write_open_xml_tag('letStatement')
+
         self._compile_expected_token(JackSymbol.LET)
 
         # varName
         self._compile_token()
 
-        next_token = self._peek_token()
-        if next_token.value == JackSymbol.LEFT_SQUARE_BRACES:
+        if self._peek_token().value == JackSymbol.LEFT_SQUARE_BRACES:
             # [ expression ]
             self._compile_expected_token(JackSymbol.LEFT_SQUARE_BRACES)
             self._compile_expression()
@@ -195,6 +223,8 @@ class Parser:
         self._compile_expected_token(JackSymbol.EQUAL)
         self._compile_expression()
         self._compile_expected_token(JackSymbol.SEMICOLON)
+
+        self._write_close_xml_tag('letStatement')
 
     def __compile_condition(self):
         assert self._peek_token().value in [JackSymbol.WHILE, JackSymbol.IF]
@@ -206,23 +236,37 @@ class Parser:
         self._compile_statements()
         self._compile_expected_token(JackSymbol.RIGHT_CURLY_BRACES)
 
+    @write_xml_tag('ifStatement')
     def _compile_if(self):
+        self._write_open_xml_tag('ifStatement')
+
         self.__compile_condition()
 
-        next_token = self._peek_token()
-        if next_token.value == JackSymbol.ELSE:
+        if self._peek_token().value == JackSymbol.ELSE:
             self._compile_expected_token(JackSymbol.ELSE)
             self._compile_expected_token(JackSymbol.LEFT_CURLY_BRACES)
             self._compile_statements()
             self._compile_expected_token(JackSymbol.RIGHT_CURLY_BRACES)
 
+        self._write_close_xml_tag('ifStatement')
+
+    @write_xml_tag('whileStatement')
     def _compile_while(self):
+        self._write_open_xml_tag('whileStatement')
+
         self.__compile_condition()
 
+        self._write_close_xml_tag('whileStatement')
+
+    @write_xml_tag('doStatement')
     def _compile_do(self):
+        self._write_open_xml_tag('doStatement')
+
         self._compile_expected_token(JackSymbol.DO)
         self._compile_subroutine_call()
         self._compile_expected_token(JackSymbol.SEMICOLON)
+
+        self._write_close_xml_tag('doStatement')
 
     def _compile_subroutine_call(self):
 
@@ -239,22 +283,71 @@ class Parser:
         self._compile_expression_list()
         self._compile_expected_token(JackSymbol.RIGHT_BRACES)
 
+    @write_xml_tag('returnStatement')
     def _compile_return(self):
+        self._write_open_xml_tag('returnStatement')
+
         self._compile_expected_token(JackSymbol.RETURN)
-        while self._peek_token().value != JackSymbol.SEMICOLON:
+        if self._peek_token().value != JackSymbol.SEMICOLON:
             self._compile_expression()
 
+        self._write_close_xml_tag('returnStatement')
+
+    @write_xml_tag('expression')
     def _compile_expression(self):
-        pass
+        # TODO: expand
+        # self._compile_token()
 
+        self._compile_term()
+        while self._is_op(self._peek_token()):
+            self._compile_token()
+            self._comiple_term()
+
+    @write_xml_tag('term')
     def _compile_term(self):
-        pass
-
-    def _compile_expression_list(self):
+        # '[', '(', '.'
         next_token = self._peek_token()
-        while next_token.value != JackSymbol.RIGHT_BRACES:
+        if next_token == JackSymbol.LEFT_BRACES:
+            self._compile_expected_token(JackSymbol.LEFT_BRACES)
             self._compile_expression()
+            self._compile_expected_token(JackSymbol.RIGHT_BRACES)
+        elif self._is_unary_op(next_token):
+            self._compile_token()
+            self._compile_term()
+        else:
+            self._compile_token()
+
+            # check if still parsing either one of:
+            # 1. foo[expression]
+            # 2. foo.bar(expressionList)
+            # 3. foo(expressionList)
             next_token = self._peek_token()
-            if next_token.value == JackSymbol.COMMA:
+            if next_token == JackSymbol.LEFT_SQUARE_BRACES:
+                self._compile_expected_token(JackSymbol.LEFT_SQUARE_BRACES)
+                self._compile_expression()
+                self._compile_expected_token(JackSymbol.RIGHT_SQUARE_BRACES)
+            elif next_token == JackSymbol.DOT:
+                self._compile_expected_token(JackSymbol.DOT)
+                self._compile_token()
+                self._compile_expected_token(JackSymbol.LEFT_BRACES)
+                self._compile_expression_list()
+                self._compile_expected_token(JackSymbol.RIGHT_BRACES)
+            elif next_token == JackSymbol.LEFT_BRACES:
+                self._compile_expected_token(JackSymbol.LEFT_BRACES)
+                self._compile_expression_list()
+                self._compile_expected_token(JackSymbol.RIGHT_BRACES)
+
+    def _is_unary_op(self, token):
+        return token.value in {JackSymbol.MINUS, JackSymbol.NOT}
+
+    def _is_op(self, token):
+        return token.value in [JackSymbol.PLUS, JackSymbol.MINUS, JackSymbol.MULT, JackSymbol.DIV, JackSymbol.AND,
+                               JackSymbol.OR, JackSymbol.LOWER, JackSymbol.GREATER, JackSymbol.EQUAL]
+
+    @write_xml_tag('expression_list')
+    def _compile_expression_list(self):
+        while self._peek_token().value != JackSymbol.RIGHT_BRACES:
+            self._compile_expression()
+            if self._peek_token().value == JackSymbol.COMMA:
                 self._compile_expected_token(JackSymbol.COMMA)
-                next_token = self._peek_token()
+                assert self._peek_token().value != JackSymbol.RIGHT_BRACES
