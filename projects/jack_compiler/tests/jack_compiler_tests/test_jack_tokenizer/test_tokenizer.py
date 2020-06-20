@@ -4,7 +4,7 @@ from jack_compiler.jack_tokenizer.tokenizer import Tokenizer, tokenize_to_xml
 from jack_compiler.jack_tokenizer.tokens import JackKeyword, JackSymbol, JackDecimal, JackIdentifier, JackSkip
 
 
-@Parametrization.parameters('test_subject', 'expected_tokens', 'tokenizer_debug')
+@Parametrization.parameters('test_subject', 'expected_tokens', 'debug_mode')
 @Parametrization.case('Multiple tokens in word', 'return;', [JackKeyword('return'), JackSymbol(';')], False)
 @Parametrization.case('Multiple tokens in word', 'return function', [JackKeyword('return'), JackKeyword('function')], False)
 @Parametrization.case('Multiple tokens in word', 'return3function', [JackIdentifier('return3function')], False)
@@ -12,9 +12,9 @@ from jack_compiler.jack_tokenizer.tokens import JackKeyword, JackSymbol, JackDec
 @Parametrization.case('Multiple tokens in word', 'let tst = 2 * 2;', [JackKeyword('let'), JackIdentifier('tst'), JackSymbol('='), JackDecimal('2'), JackSymbol('*'), JackDecimal('2'), JackSymbol(';')], False)
 @Parametrization.case('Multiple tokens in word with skip', ' aaa', [JackSkip(' '), JackIdentifier('aaa')], True)
 @Parametrization.case('Multiple tokens in word with skip', 'aaa // bbb;\n aaa', [JackIdentifier('aaa'), JackSkip(' '), JackSkip('// bbb;'), JackSkip('\n '), JackIdentifier('aaa')], True)
-def test_tokenize_line(test_subject, expected_tokens, tokenizer_debug):
-    tokenizer = Tokenizer('/dummy/path', debug=tokenizer_debug)
-    assert [token for token in tokenizer._tokenize_line(test_subject)] == expected_tokens
+def test_tokenize_stream(test_subject, expected_tokens, debug_mode):
+    tokenizer = Tokenizer('/dummy/path', debug=debug_mode)
+    assert [token for token in tokenizer._tokenize_stream(test_subject)] == expected_tokens
 
 
 @Parametrization.parameters('file_name')
