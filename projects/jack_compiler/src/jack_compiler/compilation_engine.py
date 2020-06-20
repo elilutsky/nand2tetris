@@ -5,16 +5,15 @@ from .jack_tokenizer.tokens import JackKeyword, JackSymbol
 from .jack_tokenizer.tokens.utils import write_token_to_xml_output
 
 
-class Parser:
-    def __init__(self, input_file, output_file):
-        self._input_file = input_file
-        self._output_file = output_file
+class CompilationEngine:
+    def __init__(self, input_file_handle, output_file_handle):
+        self._output_file_handle = output_file_handle
+        self._tokenizer = tokenize(input_file_handle)
 
-        self._tokenizer = tokenize(self._input_file)
         self._current_token = None
         self._pre_read_token = None
 
-    def parse(self):
+    def compile(self):
         self._compile_class()
 
     def write_xml_tag(self, tag_name):
@@ -30,10 +29,10 @@ class Parser:
         return decorator
 
     def _write_open_xml_tag(self, rule_name):
-        self._output_file.write(f'<{rule_name}>\n')
+        self._output_file_handle.write(f'<{rule_name}>\n')
 
     def _write_close_xml_tag(self, rule_name):
-        self._output_file.write(f'</{rule_name}>\n')
+        self._output_file_handle.write(f'</{rule_name}>\n')
 
     def _next_token(self):
         if self._pre_read_token is not None:
@@ -54,12 +53,12 @@ class Parser:
         if self._token.value != expected_token_value:
             raise Exception(f'Expected token: {expected_token_value} but got {self._token.value}')
 
-        write_token_to_xml_output(self._token, self._output_file)
+        write_token_to_xml_output(self._token, self._output_file_handle)
 
     def _compile_token(self):
         self._next_token()
 
-        write_token_to_xml_output(self._token, self._output_file)
+        write_token_to_xml_output(self._token, self._output_file_handle)
 
     @write_xml_tag('class')
     def _compile_class(self):
