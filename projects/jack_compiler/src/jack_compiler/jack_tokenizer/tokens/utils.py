@@ -1,4 +1,4 @@
-from .tokens import JackSkip, JackAlphanumeric, JackSymbol, JackString, JackIdentifier
+from . import JackAlphanumeric, JackSkip, JackKeyword, JackDecimal, JackSymbol, JackString, JackIdentifier
 
 from xml.etree.ElementTree import Element, tostring
 
@@ -10,9 +10,7 @@ CLASS_TO_XML_TAG = {
     JackIdentifier: 'identifier'
 }
 
-TOKEN_TYPES = [JackSkip, JackAlphanumeric, JackSymbol, JackString, JackIdentifier]
-
-assert set(TOKEN_TYPES) == set(CLASS_TO_XML_TAG.keys())
+TOKEN_HANDLER_TYPES = [JackSkip, JackAlphanumeric, JackSymbol, JackString, JackIdentifier]
 
 
 def write_token_to_xml_output(token, output_file):
