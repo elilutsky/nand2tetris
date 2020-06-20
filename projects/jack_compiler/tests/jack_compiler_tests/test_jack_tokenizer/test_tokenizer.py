@@ -32,8 +32,6 @@ def test_tokenize_to_xml(file_name):
     tokenize_to_xml(input_)
 
     output = input_.with_suffix('.xml')
-    expected = Path(f'{parent_dir}/files/{file_name}.xml')
+    expected = Path(f'{parent_dir}/files/{file_name}_expected.xml')
 
     assert output.read_text() == expected.read_text()
-
-    output.unlink()

@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 
-from .compilation_engine import CompilationEngine
+from jack_compiler.compilation_engine import CompilationEngine
 
 
 def syntax_analyze(input_param):
@@ -20,6 +20,7 @@ def syntax_analyze(input_param):
     for input_file_path in input_files:
         with open(input_file_path.with_suffix('.xml'), 'w') as output_file_handle:
             with open(input_file_path, 'r') as input_file_handle:
+                print(f'Compiling file {input_file_path}')
                 compiler = CompilationEngine(input_file_handle, output_file_handle)
                 compiler.compile()
 
