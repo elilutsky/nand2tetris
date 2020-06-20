@@ -28,8 +28,9 @@ def tokenize(jack_file_handle):
 
 
 class Tokenizer:
-    def __init__(self, input_file_handle):
+    def __init__(self, input_file_handle, debug=False):
         self._input_file = input_file_handle
+        self._debug = debug
 
     def __iter__(self):
         for line in self._skip_multiline_comments():
@@ -46,15 +47,15 @@ class Tokenizer:
                 line = self._input_file.readline()
             yield line
 
-    def _tokenize_line(self, line, output_skip_tokens=False):
+    def _tokenize_line(self, line):
         for token_type in TOKEN_HANDLER_TYPES:
             token, remainder = token_type.tokenize(line)
 
             if token:
-                if not isinstance(token, JackSkip) or output_skip_tokens:
+                if not isinstance(token, JackSkip) or self._debug:
                     yield token
                 if remainder:
-                    yield from self._tokenize_line(remainder, output_skip_tokens)
+                    yield from self._tokenize_line(remainder)
                 return
 
         raise Exception(f"The following input could not be resolved to a token:\n{line}")
