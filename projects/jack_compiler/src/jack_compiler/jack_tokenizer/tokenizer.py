@@ -12,8 +12,9 @@ def tokenize_to_xml(jack_file_path):
     """
     with open(Path(jack_file_path).with_suffix('.xml'), 'w') as output:
         output.write('<tokens>\n')
-        for token in tokenize(jack_file_path):
-            write_token_to_xml_output(token, output)
+        with open(jack_file_path, 'r') as input_jack_file:
+            for token in tokenize(input_jack_file):
+                write_token_to_xml_output(token, output)
         output.write('</tokens>\n')
 
 
@@ -31,7 +32,7 @@ class Tokenizer:
         self._input_file = input_file_handle
 
     def __iter__(self):
-        for line in self._skip_multiline_comments(self._input_file):
+        for line in self._skip_multiline_comments():
             yield from self._tokenize_line(line)
 
     def _skip_multiline_comments(self):

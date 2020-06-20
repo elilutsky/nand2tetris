@@ -1,11 +1,6 @@
 class JackToken:
-
     def __init__(self, token_value):
         self._token_value = token_value
-
-    @classmethod
-    def _get_token_regex(cls):
-        raise NotImplementedError()
 
     @classmethod
     def tokenize(cls, word) -> ('JackToken', str):
@@ -13,11 +8,7 @@ class JackToken:
         Returns The token and the remainder. If the word cannot be tokenized by the object then the
         returned value will be None, `word`.
         """
-        match = cls._get_token_regex().match(word)
-        if match:
-            return cls(match.group(1)), word[len(match.group(0)):]
-        else:
-            return None, word
+        raise NotImplementedError()
 
     @property
     def value(self):
@@ -28,3 +19,24 @@ class JackToken:
 
     def __repr__(self):
         return f'<{self.__class__}: \'{self.value}\'>'
+
+
+class JackRegexToken(JackToken):
+    def __init__(self, token_value):
+        super(JackRegexToken, self).__init__(token_value)
+
+    @classmethod
+    def tokenize(cls, word) -> ('JackToken', str):
+        """
+        A specific overload that uses a regex to match the token
+        """
+        match = cls._get_token_regex().match(word)
+        if match:
+            return cls(match.group(1)), word[len(match.group(0)):]
+        else:
+            return None, word
+
+    @classmethod
+    def _get_token_regex(cls):
+        raise NotImplementedError()
+

@@ -1,9 +1,9 @@
 import re
 
-from .base import JackToken
+from .base import JackRegexToken
 
 
-class JackSkip(JackToken):
+class JackSkip(JackRegexToken):
     @classmethod
     def _get_token_regex(cls):
         return re.compile(r'^(//.*)|^(\s+)')
