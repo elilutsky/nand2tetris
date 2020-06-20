@@ -46,15 +46,15 @@ class Tokenizer:
                 line = self._input_file.readline()
             yield line
 
-    def _tokenize_line(self, line):
+    def _tokenize_line(self, line, output_skip_tokens=False):
         for token_type in TOKEN_HANDLER_TYPES:
             token, remainder = token_type.tokenize(line)
 
             if token:
-                if not isinstance(token, JackSkip):
+                if not isinstance(token, JackSkip) or output_skip_tokens:
                     yield token
                 if remainder:
-                    yield from self._tokenize_line(remainder)
+                    yield from self._tokenize_line(remainder, output_skip_tokens)
                 return
 
         raise Exception(f"The following input could not be resolved to a token:\n{line}")

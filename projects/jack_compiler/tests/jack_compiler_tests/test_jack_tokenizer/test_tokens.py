@@ -1,6 +1,7 @@
 from parametrization import Parametrization
 
-from jack_compiler.jack_tokenizer.tokens import JackKeyword, JackSymbol, JackDecimal, JackString, JackIdentifier, JackAlphanumeric
+from jack_compiler.jack_tokenizer.tokens import JackKeyword, JackSymbol, JackDecimal, JackString, JackIdentifier,\
+    JackAlphanumeric, JackSkip
 
 
 @Parametrization.parameters('keyword_type', 'test_subject', 'expected')
@@ -32,5 +33,7 @@ from jack_compiler.jack_tokenizer.tokens import JackKeyword, JackSymbol, JackDec
 @Parametrization.case('Identifier valid word', JackAlphanumeric, '_Pastenino123;', (JackIdentifier('_Pastenino123'), ';'))
 @Parametrization.case('Identifier invalid word', JackAlphanumeric, '123pasten', (None, '123pasten'))
 @Parametrization.case('Identifier invalid word', JackAlphanumeric, '&^%pasd_asd', (None, '&^%pasd_asd'))
+@Parametrization.case('Skip token', JackSkip, '// bla bla bl$a_ 9', (JackSkip('// bla bla bl$a_ 9'), ''))
+@Parametrization.case('Skip token until newline', JackSkip, '// bla bla bla\naa', (JackSkip('// bla bla bla'), '\naa'))
 def test_tokenize(keyword_type, test_subject, expected):
     assert keyword_type.tokenize(test_subject) == expected
