@@ -43,12 +43,12 @@ class Tokenizer:
             else:
                 yield from self._tokenize_stream(line)
 
-    def _tokenize_stream(self, line):
-        if line.startswith('/**'):
-            line = self._skip_multiline_comment(line)
+    def _tokenize_stream(self, stream):
+        if stream.startswith('/**'):
+            stream = self._skip_multiline_comment(stream)
 
         for token_type in TOKEN_HANDLER_TYPES:
-            token, remainder = token_type.tokenize(line)
+            token, remainder = token_type.tokenize(stream)
 
             if token:
                 if not isinstance(token, JackSkip) or self._debug:
@@ -57,7 +57,7 @@ class Tokenizer:
                     yield from self._tokenize_stream(remainder)
                 return
 
-        raise Exception(f'The following input could not be resolved to a token:\n{line}')
+        raise Exception(f'The following input could not be resolved to a token:\n{stream}')
 
     def _skip_multiline_comment(self, line):
         while '*/' not in line:
