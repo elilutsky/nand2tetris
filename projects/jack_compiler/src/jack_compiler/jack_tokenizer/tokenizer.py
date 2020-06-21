@@ -62,5 +62,5 @@ class Tokenizer:
     def _skip_multiline_comment(self, line):
         while '*/' not in line:
             line = self._input_file.readline()
-        line = line[line.index('*/'):]
+        line = line[line.index('*/') + 2:]
         return line

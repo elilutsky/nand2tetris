@@ -35,3 +35,5 @@ def test_tokenize_to_xml(file_name):
     expected = Path(f'{parent_dir}/files/{file_name}_expected.xml')
 
     assert output.read_text() == expected.read_text()
+
+    output.unlink()
