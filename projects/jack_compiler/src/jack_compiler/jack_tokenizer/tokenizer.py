@@ -28,34 +28,39 @@ def tokenize(jack_file_handle):
 
 
 class Tokenizer:
-    def __init__(self, input_file_handle):
+    def __init__(self, input_file_handle, debug=False):
         self._input_file = input_file_handle
+        self._debug = debug
 
     def __iter__(self):
-        for line in self._skip_multiline_comments():
-            yield from self._tokenize_line(line)
+        yield from self._tokenize_file()
 
-    def _skip_multiline_comments(self):
+    def _tokenize_file(self):
         while True:
             line = self._input_file.readline()
             if not line:
                 return
-            if line.strip().startswith('/**'):
-                while not line.strip().endswith('*/'):
-                    line = self._input_file.readline()
-                line = self._input_file.readline()
-            yield line
+            else:
+                yield from self._tokenize_stream(line)
 
-    def _tokenize_line(self, line, output_skip_tokens=False):
+    def _tokenize_stream(self, line):
+        if line.startswith('/**'):
+            line = self._skip_multiline_comment(line)
+
         for token_type in TOKEN_HANDLER_TYPES:
             token, remainder = token_type.tokenize(line)
 
             if token:
-                if not isinstance(token, JackSkip) or output_skip_tokens:
+                if not isinstance(token, JackSkip) or self._debug:
                     yield token
                 if remainder:
-                    yield from self._tokenize_line(remainder, output_skip_tokens)
+                    yield from self._tokenize_stream(remainder)
                 return
 
-        raise Exception(f"The following input could not be resolved to a token:\n{line}")
+        raise Exception(f'The following input could not be resolved to a token:\n{line}')
 
+    def _skip_multiline_comment(self, line):
+        while '*/' not in line:
+            line = self._input_file.readline()
+        line = line[line.index('*/'):]
+        return line
