@@ -1,9 +1,9 @@
 import re
 
-from .base import JackToken
+from .base import JackRegexToken
 
 
-class JackString(JackToken):
+class JackString(JackRegexToken):
 
     @classmethod
     def _get_token_regex(cls):

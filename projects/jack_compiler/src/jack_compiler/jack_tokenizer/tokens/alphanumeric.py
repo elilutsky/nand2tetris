@@ -1,7 +1,7 @@
 import re
 from enum import Enum
 
-from .base import JackToken
+from .base import JackToken, JackRegexToken
 
 
 class JackKeyword(Enum):
@@ -39,7 +39,14 @@ class JackDecimal(JackToken):
     pass
 
 
-class JackAlphanumeric(JackToken):
+class JackIdentifier(JackToken):
+    """
+    Note: an identifier cannot start with the a digit
+    """
+    pass
+
+
+class JackAlphanumeric(JackRegexToken):
 
     @classmethod
     def _get_token_regex(cls):
@@ -54,5 +61,7 @@ class JackAlphanumeric(JackToken):
             return JackKeyword(token.value), remainder
         if token.value.isnumeric() and 0 <= int(token.value) < 32768:
             return JackDecimal(token.value), remainder
+        if not token.value[0].isnumeric():
+            return JackIdentifier(token.value), remainder
 
         return None, word
