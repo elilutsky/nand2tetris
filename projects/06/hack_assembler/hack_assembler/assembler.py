@@ -2,6 +2,8 @@ from .instruction import LabelInstruction
 from .symbol_table import SymbolTable
 from .utils import code_iterator
 
+from pathlib import Path
+
 
 def parse_data(code):
     """
