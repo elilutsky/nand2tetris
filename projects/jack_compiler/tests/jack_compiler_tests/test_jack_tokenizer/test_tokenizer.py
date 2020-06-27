@@ -1,7 +1,7 @@
 from pathlib import Path
 from parametrization import Parametrization
-from jack_compiler.jack_tokenizer.tokenizer import Tokenizer, tokenize_to_xml
-from jack_compiler.jack_tokenizer.tokens import JackKeyword, JackSymbol, JackDecimal, JackIdentifier, JackSkip
+from jack_compiler.tokenizer.tokenizer import Tokenizer, tokenize_to_xml
+from jack_compiler.tokenizer.tokens import JackKeyword, JackSymbol, JackDecimal, JackIdentifier, JackSkip
 
 
 @Parametrization.parameters('test_subject', 'expected_tokens', 'debug_mode')

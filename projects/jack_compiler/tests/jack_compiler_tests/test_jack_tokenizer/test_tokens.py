@@ -1,6 +1,6 @@
 from parametrization import Parametrization
 
-from jack_compiler.jack_tokenizer.tokens import JackKeyword, JackSymbol, JackDecimal, JackString, JackIdentifier,\
+from jack_compiler.tokenizer.tokens import JackKeyword, JackSymbol, JackDecimal, JackString, JackIdentifier,\
     JackAlphanumeric, JackSkip
 
 

@@ -1,8 +1,8 @@
 
-from .jack_tokenizer import tokenize
+from .tokenizer import tokenize
 
-from .jack_tokenizer.tokens import JackKeyword, JackSymbol
-from .jack_tokenizer.tokens.utils import write_token_to_xml_output
+from .tokenizer.tokens import JackKeyword, JackSymbol
+from .tokenizer.tokens.utils import write_token_to_xml_output
 
 
 class CompilationEngine:
