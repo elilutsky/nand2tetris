@@ -1,10 +1,24 @@
 import collections
-
-from .jack_to_vm_maps import SymbolKind
+from enum import Enum
+from .jack_to_vm_maps import SegmentType
 
 SymbolDescription = collections.namedtuple('SymbolDescription',
                                            'name type kind index')
 
+
+class SymbolKind(Enum):
+    FIELD = 'field kind'
+    STATIC = 'static kind'
+    ARGUMENT = 'argument kind'
+    LOCAL = 'local kind'
+
+
+SYMBOL_KIND_TO_SEGMENT_MAP = {
+    SymbolKind.FIELD: SegmentType.THIS,
+    SymbolKind.STATIC: SegmentType.STATIC,
+    SymbolKind.ARGUMENT: SegmentType.ARGUMENT,
+    SymbolKind.LOCAL: SegmentType.LOCAL
+}
 
 
 class SymbolTable:
@@ -28,11 +42,11 @@ class SymbolTable:
             return self._class_scope_table
         return self._function_scope_table
 
-    def _append_symbol(self, name, symbolType, kind):
+    def _append_symbol(self, name, symbol_type, kind):
         scope_table = self._symbol_kind_to_table(kind)
         assert name not in scope_table, f'f{name} variable is already defined'
         scope_table[name] = SymbolDescription(name=name,
-                                              type=symbolType,
+                                              type=symbol_type,
                                               kind=kind,
                                               index=self._get_next_symbol_index_by_kind(kind))
 
@@ -57,15 +71,25 @@ class SymbolTable:
         First, the local function scope is searched.
         If the variable is not found in function scope, the class scope is searched.
         :param name: the variable to search for for
-        :return: the SymbolDescription for the symbol, if found. Otherwise, None is returned.
+        :return: a tuple of (SegmentType, offset, type) for the VM translation. Otherwise, if not found,
+                 None is returned.
                  For a valid Jack program, if None is returned, the caller may assume the symbol is
                  either a subroutine name or a class name
         """
+
+        symbol_description = None
+
         if name in self._function_scope_table:
-            return self._function_scope_table[name]
-        if name in self._class_scope_table:
-            return self._class_scope_table[name]
-        return None
+            symbol_description = self._function_scope_table[name]
+
+        elif name in self._class_scope_table:
+            symbol_description = self._class_scope_table[name]
+
+        if symbol_description is None:
+            return None
+
+        return SYMBOL_KIND_TO_SEGMENT_MAP[symbol_description.kind], symbol_description.index, symbol_description.type
+
 
 
 

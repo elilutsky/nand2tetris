@@ -1,5 +1,7 @@
 from enum import Enum
 
+from .tokenizer.tokens import *
+
 
 class SegmentType(Enum):
     CONSTANT = 'constant'
@@ -10,13 +12,6 @@ class SegmentType(Enum):
     STATIC = 'static'
     POINTER = 'pointer'
     TEMP = 'temp'
-
-
-class SymbolKind(Enum):
-    FIELD = 'field kind'
-    STATIC = 'static kind'
-    ARGUMENT = 'argument kind'
-    LOCAL = 'local kind'
 
 
 class ArithmeticVMCommand(Enum):
@@ -31,15 +26,18 @@ class ArithmeticVMCommand(Enum):
     NOT = 'not'
 
 
-SYMBOL_KIND_TO_SEGMENT_MAP = {
-    SymbolKind.FIELD: SegmentType.THIS,
-    SymbolKind.STATIC: SegmentType.STATIC,
-    SymbolKind.ARGUMENT: SegmentType.ARGUMENT,
-    SymbolKind.LOCAL: SegmentType.LOCAL
+JACK_UNARY_OP_TO_VM_COMMAND_MAP = {
+    JackSymbol.MINUS: ArithmeticVMCommand.NEG,
+    JackSymbol.NOT: ArithmeticVMCommand.NOT
 }
 
 JACK_BIN_OP_TO_VM_COMMAND_MAP = {
-
+    JackSymbol.PLUS: ArithmeticVMCommand.ADD,
+    JackSymbol.MINUS: ArithmeticVMCommand.SUB,
+    JackSymbol.AND: ArithmeticVMCommand.AND,
+    JackSymbol.OR: ArithmeticVMCommand.OR,
+    JackSymbol.LOWER: ArithmeticVMCommand.LT,
+    JackSymbol.GREATER: ArithmeticVMCommand.GT
 }
 
 

@@ -1,9 +1,7 @@
 from .jack_to_vm_maps import SegmentType, ArithmeticVMCommand
 
 
-
-
-class VmWriter:
+class VMWriter:
     def __init__(self, output_vm_file_handle):
         self._output_file_handle = output_vm_file_handle
 
@@ -39,3 +37,13 @@ class VmWriter:
 
     def write_return(self):
         self._write('return')
+
+    def write_constructor_entry(self, size_of_object_in_words):
+        self.write_push(SegmentType.CONSTANT, size_of_object_in_words)
+        self.write_call("Memory.alloc", 1)
+        self.write_pop(SegmentType.POINTER, 0)
+
+    def write_method_entry(self):
+        # this = argument 0
+        self.write_push(SegmentType.ARGUMENT, 0)
+        self.write_pop(SegmentType.POINTER, 0)
