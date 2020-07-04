@@ -233,7 +233,7 @@ class CompilationEngine:
         self._compile_expression()
         self._skip_expected_token(JackSymbol.SEMICOLON)
 
-        segment_type, offset = self._symbol_table.resolve_symbol(symbol_name)
+        segment_type, offset, symbol_type = self._symbol_table.resolve_symbol(symbol_name)
         self._vm_writer.write_pop(segment_type, offset)
 
     def __compile_condition(self):
@@ -375,7 +375,7 @@ class CompilationEngine:
                     self._write_identifier_push(token.value)
 
     def _write_identifier_push(self, identifier):
-        segment_type, index, = self._symbol_table.resolve_symbol(identifier)
+        segment_type, index, symbol_type = self._symbol_table.resolve_symbol(identifier)
         self._vm_writer.write_push(segment_type, index)
 
     def _resolve_subroutine_and_target_names(self, function_name, call_target_name=None):

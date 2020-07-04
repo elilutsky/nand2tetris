@@ -33,14 +33,14 @@ class SymbolTable:
     def _get_next_symbol_index_by_kind(self, kind):
         table_to_search = self._symbol_kind_to_table(kind)
 
-        indices = [symbol_info.index for symbol_info in table_to_search if symbol_info.kind == kind]
+        indices = [symbol_info.index for symbol_info in table_to_search.values() if symbol_info.kind == kind]
         current_max = max(indices) if len(indices) > 0 else 0
 
         return current_max + 1
 
     def _symbol_kind_to_table(self, kind):
-        assert isinstance(type, SymbolKind)
-        if kind in [SymbolTable.STATIC, SymbolTable.FIELD]:
+        assert isinstance(kind, SymbolKind)
+        if kind in [SymbolKind.STATIC, SymbolKind.FIELD]:
             return self._class_scope_table
         return self._function_scope_table
 
