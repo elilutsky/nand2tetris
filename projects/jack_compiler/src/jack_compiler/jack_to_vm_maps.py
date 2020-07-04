@@ -45,7 +45,8 @@ JACK_BIN_OP_TO_VM_COMMAND_MAP = {
     JackSymbol.AND.value: ArithmeticVMCommand.AND,
     JackSymbol.OR.value: ArithmeticVMCommand.OR,
     JackSymbol.LOWER.value: ArithmeticVMCommand.LT,
-    JackSymbol.GREATER.value: ArithmeticVMCommand.GT
+    JackSymbol.GREATER.value: ArithmeticVMCommand.GT,
+    JackSymbol.EQUAL.value: ArithmeticVMCommand.EQ
 }
 
 

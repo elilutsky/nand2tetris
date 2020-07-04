@@ -34,9 +34,7 @@ class SymbolTable:
         table_to_search = self._symbol_kind_to_table(kind)
 
         indices = [symbol_info.index for symbol_info in table_to_search.values() if symbol_info.kind == kind]
-        current_max = max(indices) if len(indices) > 0 else 0
-
-        return current_max + 1
+        return max(indices) + 1 if len(indices) > 0 else 0
 
     def _symbol_kind_to_table(self, kind):
         assert isinstance(kind, SymbolKind)
@@ -52,9 +50,10 @@ class SymbolTable:
                                               kind=kind,
                                               index=self._get_next_symbol_index_by_kind(kind))
 
-    def reset_function_scope(self, class_name):
+    def reset_function_scope(self):
         self._function_scope_table = dict()
 
+    def append_this(self, class_name):
         # set 'this' to represent the first entry of the POINTER segment
         self._function_scope_table['this'] = SymbolDescription(name='this',
                                                                type=class_name,

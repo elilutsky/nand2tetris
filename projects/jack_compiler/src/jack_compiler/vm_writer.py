@@ -21,7 +21,7 @@ class VMWriter:
         self._write(f'{command.value}')
 
     def write_label(self, label):
-        self._write(f'{label}:')
+        self._write(f'label {label}')
 
     def write_goto(self, label):
         self._write(f'goto {label}')

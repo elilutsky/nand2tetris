@@ -19,6 +19,7 @@ class CompilationEngine:
         self._size_of_class_in_words = None
         self._jack_class_name = None
         self._does_current_subroutine_return_void = False
+        self._label_counter = 0
 
     def compile(self):
         self._compile_class()
@@ -104,12 +105,23 @@ class CompilationEngine:
 
         return num_fields
 
-    def _compile_subroutine_dec_single(self):
-        self._symbol_table.reset_function_scope(self._jack_class_name)
-        self._does_current_subroutine_return_void = False
+    def _make_unique_label(self, additional_string=None):
+        if additional_string:
+            label_name = f'gen_label_{additional_string}_{self._label_counter}'
+        else:
+            label_name = f'gen_label_{self._label_counter}'
+        self._label_counter += 1
+        return label_name
 
+    def _compile_subroutine_dec_single(self):
         # constructor | function | method
         subroutine_type_token = self._get_token()
+
+        self._symbol_table.reset_function_scope()
+        self._does_current_subroutine_return_void = False
+
+        if subroutine_type_token == JackKeyword.CONSTRUCTOR or subroutine_type_token == JackKeyword.METHOD:
+            self._symbol_table.append_this(self._jack_class_name)
 
         # void | type
         return_type = self._get_token()
@@ -204,9 +216,9 @@ class CompilationEngine:
             if next_token == JackKeyword.LET:
                 self._compile_let()
             elif next_token == JackKeyword.IF:
-                self._compile_if()  # TODO: implement
+                self._compile_if()
             elif next_token == JackKeyword.WHILE:
-                self._compile_while() # TODO: implement
+                self._compile_while()
             elif next_token == JackKeyword.DO:
                 self._compile_do()
             elif next_token == JackKeyword.RETURN:
@@ -236,27 +248,49 @@ class CompilationEngine:
         segment_type, offset, symbol_type = self._symbol_table.resolve_symbol(symbol_name)
         self._vm_writer.write_pop(segment_type, offset)
 
-    def __compile_condition(self):
+    def __compile_condition(self, false_label_name):
         assert self._peek_token().value in [JackKeyword.WHILE.value, JackKeyword.IF.value]
-        self._compile_token()
-        self._compile_expected_token(JackSymbol.LEFT_BRACES)
+        self._skip_token()
+        self._skip_expected_token(JackSymbol.LEFT_BRACES)
         self._compile_expression()
-        self._compile_expected_token(JackSymbol.RIGHT_BRACES)
-        self._compile_expected_token(JackSymbol.LEFT_CURLY_BRACES)
+        self._vm_writer.write_arithmetic(ArithmeticVMCommand.NOT)
+        self._vm_writer.write_if_goto(false_label_name)
+
+        self._skip_expected_token(JackSymbol.RIGHT_BRACES)
+        self._skip_expected_token(JackSymbol.LEFT_CURLY_BRACES)
         self._compile_statements()
-        self._compile_expected_token(JackSymbol.RIGHT_CURLY_BRACES)
+        self._skip_expected_token(JackSymbol.RIGHT_CURLY_BRACES)
 
     def _compile_if(self):
-        self.__compile_condition()
+
+        false_label_name = self._make_unique_label('if_false')
+
+        self.__compile_condition(false_label_name)
 
         if self._peek_token() == JackKeyword.ELSE:
-            self._compile_expected_token(JackKeyword.ELSE)
-            self._compile_expected_token(JackSymbol.LEFT_CURLY_BRACES)
+            end_label_name = self._make_unique_label('if_end')
+            self._vm_writer.write_goto(end_label_name)
+
+            self._skip_expected_token(JackKeyword.ELSE)
+            self._skip_expected_token(JackSymbol.LEFT_CURLY_BRACES)
+
+            self._vm_writer.write_label(false_label_name)
             self._compile_statements()
-            self._compile_expected_token(JackSymbol.RIGHT_CURLY_BRACES)
+            self._vm_writer.write_label(end_label_name)
+
+            self._skip_expected_token(JackSymbol.RIGHT_CURLY_BRACES)
+        else:
+            self._vm_writer.write_label(false_label_name)
 
     def _compile_while(self):
-        self.__compile_condition()
+        false_label_name = self._make_unique_label('while_false')
+        condition_label_name = self._make_unique_label('while_condition')
+
+        self._vm_writer.write_label(condition_label_name)
+
+        self.__compile_condition(false_label_name)
+        self._vm_writer.write_goto(condition_label_name)
+        self._vm_writer.write_label(false_label_name)
 
     def _compile_do(self):
 
