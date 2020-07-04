@@ -3,7 +3,7 @@ from enum import Enum
 from .tokenizer.tokens import *
 
 
-class SegmentType(Enum):
+class VMSegmentType(Enum):
     CONSTANT = 'constant'
     LOCAL = 'local'
     ARGUMENT = 'argument'
@@ -14,7 +14,7 @@ class SegmentType(Enum):
     TEMP = 'temp'
 
 
-class ArithmeticVMCommand(Enum):
+class VMArithmeticCommand(Enum):
     ADD = 'add'
     SUB = 'sub'
     NEG = 'neg'
@@ -35,18 +35,18 @@ def translate_jack_unary_op_token_to_vm_command(op_token):
 
 
 JACK_UNARY_OP_TO_VM_COMMAND_MAP = {
-    JackSymbol.MINUS.value: ArithmeticVMCommand.NEG,
-    JackSymbol.NOT.value: ArithmeticVMCommand.NOT
+    JackSymbol.MINUS.value: VMArithmeticCommand.NEG,
+    JackSymbol.NOT.value: VMArithmeticCommand.NOT
 }
 
 JACK_BIN_OP_TO_VM_COMMAND_MAP = {
-    JackSymbol.PLUS.value: ArithmeticVMCommand.ADD,
-    JackSymbol.MINUS.value: ArithmeticVMCommand.SUB,
-    JackSymbol.AND.value: ArithmeticVMCommand.AND,
-    JackSymbol.OR.value: ArithmeticVMCommand.OR,
-    JackSymbol.LOWER.value: ArithmeticVMCommand.LT,
-    JackSymbol.GREATER.value: ArithmeticVMCommand.GT,
-    JackSymbol.EQUAL.value: ArithmeticVMCommand.EQ
+    JackSymbol.PLUS.value: VMArithmeticCommand.ADD,
+    JackSymbol.MINUS.value: VMArithmeticCommand.SUB,
+    JackSymbol.AND.value: VMArithmeticCommand.AND,
+    JackSymbol.OR.value: VMArithmeticCommand.OR,
+    JackSymbol.LOWER.value: VMArithmeticCommand.LT,
+    JackSymbol.GREATER.value: VMArithmeticCommand.GT,
+    JackSymbol.EQUAL.value: VMArithmeticCommand.EQ
 }
 
 

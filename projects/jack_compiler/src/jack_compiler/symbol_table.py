@@ -1,12 +1,12 @@
 import collections
 from enum import Enum
-from .jack_to_vm_maps import SegmentType
+from .jack_to_vm_maps import VMSegmentType
 
 SymbolDescription = collections.namedtuple('SymbolDescription',
                                            'name type kind index')
 
 
-class SymbolKind(Enum):
+class _SymbolKind(Enum):
     FIELD = 'field kind'
     STATIC = 'static kind'
     ARGUMENT = 'argument kind'
@@ -14,12 +14,12 @@ class SymbolKind(Enum):
     POINTER = 'pointer kind'
 
 
-SYMBOL_KIND_TO_SEGMENT_MAP = {
-    SymbolKind.FIELD: SegmentType.THIS,
-    SymbolKind.STATIC: SegmentType.STATIC,
-    SymbolKind.ARGUMENT: SegmentType.ARGUMENT,
-    SymbolKind.LOCAL: SegmentType.LOCAL,
-    SymbolKind.POINTER: SegmentType.POINTER
+_SYMBOL_KIND_TO_SEGMENT_MAP = {
+    _SymbolKind.FIELD: VMSegmentType.THIS,
+    _SymbolKind.STATIC: VMSegmentType.STATIC,
+    _SymbolKind.ARGUMENT: VMSegmentType.ARGUMENT,
+    _SymbolKind.LOCAL: VMSegmentType.LOCAL,
+    _SymbolKind.POINTER: VMSegmentType.POINTER
 }
 
 
@@ -37,8 +37,8 @@ class SymbolTable:
         return max(indices) + 1 if len(indices) > 0 else 0
 
     def _symbol_kind_to_table(self, kind):
-        assert isinstance(kind, SymbolKind)
-        if kind in [SymbolKind.STATIC, SymbolKind.FIELD]:
+        assert isinstance(kind, _SymbolKind)
+        if kind in [_SymbolKind.STATIC, _SymbolKind.FIELD]:
             return self._class_scope_table
         return self._function_scope_table
 
@@ -57,20 +57,20 @@ class SymbolTable:
         # set 'this' to represent the first entry of the POINTER segment
         self._function_scope_table['this'] = SymbolDescription(name='this',
                                                                type=class_name,
-                                                               kind=SymbolKind.POINTER,
+                                                               kind=_SymbolKind.POINTER,
                                                                index=0)
 
     def append_static(self, name, symbol_type):
-        self._append_symbol(name, symbol_type, SymbolKind.STATIC)
+        self._append_symbol(name, symbol_type, _SymbolKind.STATIC)
 
     def append_field(self, name, symbol_type):
-        self._append_symbol(name, symbol_type, SymbolKind.FIELD)
+        self._append_symbol(name, symbol_type, _SymbolKind.FIELD)
 
     def append_argument(self, name, symbol_type):
-        self._append_symbol(name, symbol_type, SymbolKind.ARGUMENT)
+        self._append_symbol(name, symbol_type, _SymbolKind.ARGUMENT)
 
     def append_local(self, name, symbol_type):
-        self._append_symbol(name, symbol_type, SymbolKind.LOCAL)
+        self._append_symbol(name, symbol_type, _SymbolKind.LOCAL)
 
     def resolve_symbol(self, name):
         """
@@ -78,7 +78,7 @@ class SymbolTable:
         First, the local function scope is searched.
         If the variable is not found in function scope, the class scope is searched.
         :param name: the variable to search for for
-        :return: a tuple of (SegmentType, offset, type) for the VM translation. Otherwise, if not found,
+        :return: a tuple of (VMSegmentType, offset, type) for the VM translation. Otherwise, if not found,
                  None is returned.
                  For a valid Jack program, if None is returned, the caller may assume the symbol is
                  either a subroutine name or a class name
@@ -95,7 +95,7 @@ class SymbolTable:
         if symbol_description is None:
             return None
 
-        return SYMBOL_KIND_TO_SEGMENT_MAP[symbol_description.kind], symbol_description.index, symbol_description.type
+        return _SYMBOL_KIND_TO_SEGMENT_MAP[symbol_description.kind], symbol_description.index, symbol_description.type
 
 
 

@@ -1,4 +1,4 @@
-from .jack_to_vm_maps import SegmentType, ArithmeticVMCommand
+from .jack_to_vm_maps import VMSegmentType, VMArithmeticCommand
 
 
 class VMWriter:
@@ -9,15 +9,15 @@ class VMWriter:
         self._output_file_handle.write(value + "\n")
 
     def write_push(self, segment_type, index):
-        assert segment_type in SegmentType, f'{segment_type} invalid segment type '
+        assert segment_type in VMSegmentType, f'{segment_type} invalid segment type '
         self._write(f'push {segment_type.value} {index}')
 
     def write_pop(self, segment_type, index):
-        assert segment_type in SegmentType, f'{segment_type} invalid segment type'
+        assert segment_type in VMSegmentType, f'{segment_type} invalid segment type'
         self._write(f'pop {segment_type.value} {index}')
 
     def write_arithmetic(self, command):
-        assert command in ArithmeticVMCommand, f'{command} invalid arithmetic command'
+        assert command in VMArithmeticCommand, f'{command} invalid arithmetic command'
         self._write(f'{command.value}')
 
     def write_label(self, label):
@@ -39,11 +39,11 @@ class VMWriter:
         self._write('return')
 
     def write_constructor_entry(self, size_of_object_in_words):
-        self.write_push(SegmentType.CONSTANT, size_of_object_in_words)
+        self.write_push(VMSegmentType.CONSTANT, size_of_object_in_words)
         self.write_call("Memory.alloc", 1)
-        self.write_pop(SegmentType.POINTER, 0)
+        self.write_pop(VMSegmentType.POINTER, 0)
 
     def write_method_entry(self):
         # this = argument 0
-        self.write_push(SegmentType.ARGUMENT, 0)
-        self.write_pop(SegmentType.POINTER, 0)
+        self.write_push(VMSegmentType.ARGUMENT, 0)
+        self.write_pop(VMSegmentType.POINTER, 0)

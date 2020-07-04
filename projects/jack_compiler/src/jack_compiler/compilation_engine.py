@@ -4,7 +4,7 @@ from .tokenizer import tokenize
 from .tokenizer.tokens import JackKeyword, JackSymbol, JackDecimal, JackString, JackIdentifier
 from .symbol_table import SymbolTable
 from .vm_writer import VMWriter
-from .jack_to_vm_maps import translate_jack_op_token_to_vm_command, translate_jack_unary_op_token_to_vm_command, SegmentType, ArithmeticVMCommand
+from .jack_to_vm_maps import translate_jack_op_token_to_vm_command, translate_jack_unary_op_token_to_vm_command, VMSegmentType, VMArithmeticCommand
 
 
 class CompilationEngine:
@@ -79,7 +79,7 @@ class CompilationEngine:
             else:
                 self._symbol_table.append_static(name, type_token.value)
 
-        append_symbol(identifier)
+        append_symbol(identifier.value)
 
         next_token = self._peek_token()
         while next_token == JackSymbol.COMMA:
@@ -88,7 +88,7 @@ class CompilationEngine:
 
             # varName: identifier
             identifier = self._get_token()
-            append_symbol(identifier)
+            append_symbol(identifier.value)
 
             next_token = self._peek_token()
 
@@ -253,7 +253,7 @@ class CompilationEngine:
         self._skip_token()
         self._skip_expected_token(JackSymbol.LEFT_BRACES)
         self._compile_expression()
-        self._vm_writer.write_arithmetic(ArithmeticVMCommand.NOT)
+        self._vm_writer.write_arithmetic(VMArithmeticCommand.NOT)
         self._vm_writer.write_if_goto(false_label_name)
 
         self._skip_expected_token(JackSymbol.RIGHT_BRACES)
@@ -301,7 +301,7 @@ class CompilationEngine:
         self._skip_expected_token(JackSymbol.SEMICOLON)
 
         # ignore the return value
-        self._vm_writer.write_pop(SegmentType.TEMP, 0)
+        self._vm_writer.write_pop(VMSegmentType.TEMP, 0)
 
     def _compile_return(self):
 
@@ -312,7 +312,7 @@ class CompilationEngine:
         self._skip_expected_token(JackSymbol.SEMICOLON)
 
         if self._does_current_subroutine_return_void:
-            self._vm_writer.write_push(SegmentType.CONSTANT, 0)
+            self._vm_writer.write_push(VMSegmentType.CONSTANT, 0)
         self._vm_writer.write_return()
 
     def _compile_expression(self):
@@ -390,17 +390,17 @@ class CompilationEngine:
             else:
                 # integerConstant | stringConstant | keywordConstant | varName
                 if isinstance(token, JackDecimal):
-                    self._vm_writer.write_push(SegmentType.CONSTANT, token.value)
+                    self._vm_writer.write_push(VMSegmentType.CONSTANT, token.value)
                 elif isinstance(token, JackString):
                     # TODO: handle creating a string
                     raise NotImplementedError()
 
                 elif isinstance(token, JackKeyword):
                     if token == JackKeyword.TRUE:
-                        self._vm_writer.write_push(SegmentType.CONSTANT, 0)
-                        self._vm_writer.write_arithmetic(ArithmeticVMCommand.NOT)
+                        self._vm_writer.write_push(VMSegmentType.CONSTANT, 0)
+                        self._vm_writer.write_arithmetic(VMArithmeticCommand.NOT)
                     elif token == JackKeyword.FALSE or token == JackKeyword.NULL:
-                        self._vm_writer.write_push(SegmentType.CONSTANT, 0)
+                        self._vm_writer.write_push(VMSegmentType.CONSTANT, 0)
                     else:
                         assert token == JackKeyword.THIS
                         self._write_identifier_push('this')
