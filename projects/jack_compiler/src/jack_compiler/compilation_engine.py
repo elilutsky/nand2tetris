@@ -375,17 +375,10 @@ class CompilationEngine:
     def _compile_string_constant(self, string_value):
         self._vm_writer.write_push(VMSegmentType.CONSTANT, len(string_value))
         self._vm_writer.write_call('String.new', 1)
-        self._vm_writer.write_pop(VMSegmentType.TEMP, 0)
 
         for i in range(len(string_value)):
-            self._vm_writer.write_push(VMSegmentType.TEMP, 0)
             self._vm_writer.write_push(VMSegmentType.CONSTANT, ord(string_value[i]))
             self._vm_writer.write_call('String.appendChar', 2)
-
-            # ignore return value
-            self._vm_writer.write_pop(VMSegmentType.TEMP, 1)
-
-        self._vm_writer.write_push(VMSegmentType.TEMP, 0)
 
     def _compile_array_term(self, arr_identifier_string):
         self._skip_expected_token(JackSymbol.LEFT_SQUARE_BRACES)
