@@ -208,7 +208,7 @@ class CompilationEngine:
             elif next_token == JackKeyword.WHILE:
                 self._compile_while() # TODO: implement
             elif next_token == JackKeyword.DO:
-                self._compile_do()    # TODO: implement
+                self._compile_do()
             elif next_token == JackKeyword.RETURN:
                 self._compile_return()  # TODO: implement
             else:
@@ -260,25 +260,14 @@ class CompilationEngine:
 
     def _compile_do(self):
 
-        self._compile_expected_token(JackKeyword.DO)
-        self._resolve_subroutine_and_target_names()
-        self._compile_expected_token(JackSymbol.SEMICOLON)
-
-    def _compile_subroutine_call(self):
-
+        self._skip_expected_token(JackKeyword.DO)
         # subroutineName, or className, or varName
-        self._compile_token()
+        identifier_token = self._get_token()
+        self._compile_subroutine_call_term(identifier_token)
+        self._skip_expected_token(JackSymbol.SEMICOLON)
 
-        next_token = self._peek_token()
-        if next_token == JackSymbol.DOT:
-            self._compile_expected_token(JackSymbol.DOT)
-
-            # subroutineName
-            self._compile_token()
-
-        self._compile_expected_token(JackSymbol.LEFT_BRACES)
-        self._compile_expression_list()
-        self._compile_expected_token(JackSymbol.RIGHT_BRACES)
+        # ignore the return value
+        self._vm_writer.write_pop(SegmentType.TEMP, 0)
 
     def _compile_return(self):
 
@@ -308,10 +297,9 @@ class CompilationEngine:
                 self._vm_writer.write_arithmetic(JACK_BIN_OP_TO_VM_COMMAND_MAP[op_token])
 
     def _compile_subroutine_call_term(self, initial_token):
-        # check if still parsing either one of:
-        # 1. foo[expression]
-        # 2. foo.bar(expressionList)
-        # 3. foo(expressionList)
+        # Parse either one of:
+        # 1. foo.bar(expressionList)
+        # 2. foo(expressionList)
         next_token = self._peek_token()
 
         if next_token == JackSymbol.DOT:
