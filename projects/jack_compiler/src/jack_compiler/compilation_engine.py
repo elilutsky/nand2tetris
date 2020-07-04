@@ -18,6 +18,7 @@ class CompilationEngine:
 
         self._size_of_class_in_words = None
         self._jack_class_name = None
+        self._does_current_subroutine_return_void = False
 
     def compile(self):
         self._compile_class()
@@ -104,14 +105,16 @@ class CompilationEngine:
         return num_fields
 
     def _compile_subroutine_dec_single(self):
-
-        # TODO: handle 'this' variable in symbol table.
+        self._symbol_table.reset_function_scope(self._jack_class_name)
+        self._does_current_subroutine_return_void = False
 
         # constructor | function | method
         subroutine_type_token = self._get_token()
 
-        # void | type, ignored by our compiler
-        self._get_token()
+        # void | type
+        return_type = self._get_token()
+        if return_type == JackKeyword.VOID:
+            self._does_current_subroutine_return_void = True
 
         # subroutineName
         name = self._get_token()
@@ -126,7 +129,7 @@ class CompilationEngine:
 
         self._vm_writer.write_function(f"{self._jack_class_name}.{name.value}", num_locals)
 
-        if subroutine_type_token == JackKeyword.CLASS:
+        if subroutine_type_token == JackKeyword.CONSTRUCTOR:
             self._vm_writer.write_constructor_entry(self._size_of_class_in_words)
         elif subroutine_type_token == JackKeyword.METHOD:
             self._vm_writer.write_method_entry()
@@ -201,13 +204,13 @@ class CompilationEngine:
             if next_token == JackKeyword.LET:
                 self._compile_let()
             elif next_token == JackKeyword.IF:
-                self._compile_if()
+                self._compile_if()  # TODO: implement
             elif next_token == JackKeyword.WHILE:
-                self._compile_while()
+                self._compile_while() # TODO: implement
             elif next_token == JackKeyword.DO:
-                self._compile_do()
+                self._compile_do()    # TODO: implement
             elif next_token == JackKeyword.RETURN:
-                self._compile_return()
+                self._compile_return()  # TODO: implement
             else:
                 break
 
@@ -285,13 +288,54 @@ class CompilationEngine:
 
         self._compile_expected_token(JackSymbol.SEMICOLON)
 
+        if self._does_current_subroutine_return_void:
+            self._vm_writer.write_push(SegmentType.CONSTANT, 0)
+        self._vm_writer.write_return()
+
     def _compile_expression(self):
-        # TODO: handle more than one term properly
+        # operator precedence is left to write, intentionally
         self._compile_term()
         while self._is_op(self._peek_token()):
 
             op_token = self._get_token()
             self._compile_term()
+
+            if op_token == JackSymbol.MULT:
+                self._vm_writer.write_call('Math.multiply', 2)
+            elif op_token == JackSymbol.DIV:
+                self._vm_writer.write_call('Math.divide', 2)
+            else:
+                self._vm_writer.write_arithmetic(JACK_BIN_OP_TO_VM_COMMAND_MAP[op_token])
+
+    def _compile_subroutine_call_term(self, initial_token):
+        # check if still parsing either one of:
+        # 1. foo[expression]
+        # 2. foo.bar(expressionList)
+        # 3. foo(expressionList)
+        next_token = self._peek_token()
+
+        if next_token == JackSymbol.DOT:
+            self._skip_expected_token(JackSymbol.DOT)
+            function_name = self._get_token().value
+            call_target_name = initial_token.value
+        else:
+            function_name = initial_token.value
+            call_target_name = None
+
+        subroutine_name, target_object_name = self._resolve_subroutine_and_target_names(function_name,
+                                                                                        call_target_name)
+
+        num_arguments = 0
+        if target_object_name is not None:
+            # need to push the address of the object first
+            self._write_identifier_push(target_object_name)
+            num_arguments = 1
+
+        self._skip_expected_token(JackSymbol.LEFT_BRACES)
+        num_arguments += self._compile_expression_list()
+        self._skip_expected_token(JackSymbol.RIGHT_BRACES)
+
+        self._vm_writer.write_call(subroutine_name, num_arguments)
 
     def _compile_term(self):
         next_token = self._peek_token()
@@ -313,35 +357,14 @@ class CompilationEngine:
             # 3. foo(expressionList)
             next_token = self._peek_token()
             if next_token == JackSymbol.LEFT_SQUARE_BRACES:
+                raise NotImplementedError()
+
                 self._skip_expected_token(JackSymbol.LEFT_SQUARE_BRACES)
                 self._compile_expression()
                 self._skip_expected_token(JackSymbol.RIGHT_SQUARE_BRACES)
+
             elif next_token == JackSymbol.DOT or next_token == JackSymbol.LEFT_BRACES:
-                # subroutine call
-
-                if next_token == JackSymbol.DOT:
-                    self._skip_expected_token(JackSymbol.DOT)
-                    function_name = self._get_token().value
-                    call_target_name = token.value
-                else:
-                    function_name = token.value
-                    call_target_name = None
-
-                subroutine_name, target_object_name = self._resolve_subroutine_and_target_names(function_name,
-                                                                                                call_target_name)
-
-                num_arguments = 0
-                if target_object_name is not None:
-                    # need to push the address of the object first
-                    segment, index, = self._symbol_table.resolve_symbol(target_object_name)
-                    self._vm_writer.write_push(segment, index)
-                    num_arguments = 1
-
-                self._skip_expected_token(JackSymbol.LEFT_BRACES)
-                num_arguments += self._compile_expression_list()
-                self._skip_expected_token(JackSymbol.RIGHT_BRACES)
-
-                self._vm_writer.write_call(subroutine_name, num_arguments)
+                self._compile_subroutine_call_term(token)
             else:
                 # integerConstant | stringConstant | keywordConstant | varName
                 if isinstance(token, JackDecimal):
@@ -349,6 +372,7 @@ class CompilationEngine:
                 elif isinstance(token, JackString):
                     # TODO: handle creating a string
                     raise NotImplementedError()
+
                 elif isinstance(token, JackKeyword):
                     if token == JackKeyword.TRUE:
                         self._vm_writer.write_push(SegmentType.CONSTANT, 0)
@@ -357,7 +381,6 @@ class CompilationEngine:
                         self._vm_writer.write_push(SegmentType.CONSTANT, 0)
                     else:
                         assert token == JackKeyword.THIS
-                        # TODO: edge case in CTOR, this shouldn't be resolved as a parameter
                         self._write_identifier_push('this')
                 else:
                     assert isinstance(token, JackIdentifier), f'{token}.value should be an identifier'
@@ -371,8 +394,8 @@ class CompilationEngine:
         subroutine_full_name = None
         object_identifier = None
 
-        if object_identifier is not None:
-            # method call of form <identifier>.<identifier>(..)
+        if call_target_name is not None:
+            # method call of form <call_target_name>.<function_name>(..)
             symbol_description_tuple = self._symbol_table.resolve_symbol(call_target_name)
             if symbol_description_tuple is None:
                 # for a valid jack program, we assume that in this case this must be a class name
@@ -387,7 +410,6 @@ class CompilationEngine:
             subroutine_full_name = f"{self._jack_class_name}.{function_name}"
             object_identifier = 'this'
 
-        # TODO: for a call of format <var_name>(..), is var_name necessarly a non-static method?
         return subroutine_full_name, object_identifier
 
     def _is_unary_op(self, token):

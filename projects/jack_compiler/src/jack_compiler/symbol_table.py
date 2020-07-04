@@ -11,13 +11,15 @@ class SymbolKind(Enum):
     STATIC = 'static kind'
     ARGUMENT = 'argument kind'
     LOCAL = 'local kind'
+    POINTER = 'pointer kind'
 
 
 SYMBOL_KIND_TO_SEGMENT_MAP = {
     SymbolKind.FIELD: SegmentType.THIS,
     SymbolKind.STATIC: SegmentType.STATIC,
     SymbolKind.ARGUMENT: SegmentType.ARGUMENT,
-    SymbolKind.LOCAL: SegmentType.LOCAL
+    SymbolKind.LOCAL: SegmentType.LOCAL,
+    SymbolKind.POINTER: SegmentType.POINTER
 }
 
 
@@ -50,8 +52,14 @@ class SymbolTable:
                                               kind=kind,
                                               index=self._get_next_symbol_index_by_kind(kind))
 
-    def reset_function_scope(self):
+    def reset_function_scope(self, class_name):
         self._function_scope_table = dict()
+
+        # set 'this' to represent the first entry of the POINTER segment
+        self._function_scope_table['this'] = SymbolDescription(name='this',
+                                                               type=class_name,
+                                                               kind=SymbolKind.POINTER,
+                                                               index=0)
 
     def append_static(self, name, symbol_type):
         self._append_symbol(name, symbol_type, SymbolKind.STATIC)
