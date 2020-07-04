@@ -26,18 +26,26 @@ class ArithmeticVMCommand(Enum):
     NOT = 'not'
 
 
+def translate_jack_op_token_to_vm_command(op_token):
+    return JACK_BIN_OP_TO_VM_COMMAND_MAP[op_token.value]
+
+
+def translate_jack_unary_op_token_to_vm_command(op_token):
+    return JACK_UNARY_OP_TO_VM_COMMAND_MAP[op_token.value]
+
+
 JACK_UNARY_OP_TO_VM_COMMAND_MAP = {
-    JackSymbol.MINUS: ArithmeticVMCommand.NEG,
-    JackSymbol.NOT: ArithmeticVMCommand.NOT
+    JackSymbol.MINUS.value: ArithmeticVMCommand.NEG,
+    JackSymbol.NOT.value: ArithmeticVMCommand.NOT
 }
 
 JACK_BIN_OP_TO_VM_COMMAND_MAP = {
-    JackSymbol.PLUS: ArithmeticVMCommand.ADD,
-    JackSymbol.MINUS: ArithmeticVMCommand.SUB,
-    JackSymbol.AND: ArithmeticVMCommand.AND,
-    JackSymbol.OR: ArithmeticVMCommand.OR,
-    JackSymbol.LOWER: ArithmeticVMCommand.LT,
-    JackSymbol.GREATER: ArithmeticVMCommand.GT
+    JackSymbol.PLUS.value: ArithmeticVMCommand.ADD,
+    JackSymbol.MINUS.value: ArithmeticVMCommand.SUB,
+    JackSymbol.AND.value: ArithmeticVMCommand.AND,
+    JackSymbol.OR.value: ArithmeticVMCommand.OR,
+    JackSymbol.LOWER.value: ArithmeticVMCommand.LT,
+    JackSymbol.GREATER.value: ArithmeticVMCommand.GT
 }
 
 

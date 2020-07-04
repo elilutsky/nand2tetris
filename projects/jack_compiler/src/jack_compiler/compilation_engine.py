@@ -4,7 +4,7 @@ from .tokenizer import tokenize
 from .tokenizer.tokens import JackKeyword, JackSymbol, JackDecimal, JackString, JackIdentifier
 from .symbol_table import SymbolTable
 from .vm_writer import VMWriter
-from .jack_to_vm_maps import JACK_BIN_OP_TO_VM_COMMAND_MAP, JACK_UNARY_OP_TO_VM_COMMAND_MAP, SegmentType, ArithmeticVMCommand
+from .jack_to_vm_maps import translate_jack_op_token_to_vm_command, translate_jack_unary_op_token_to_vm_command, SegmentType, ArithmeticVMCommand
 
 
 class CompilationEngine:
@@ -52,11 +52,11 @@ class CompilationEngine:
     def _compile_class(self):
         self._skip_expected_token(JackKeyword.CLASS)
         # className
-        self._jack_class_name = self._get_token()
+        self._jack_class_name = self._get_token().value
         self._skip_expected_token(JackSymbol.LEFT_CURLY_BRACES)
         self._size_of_class_in_words = self._compile_class_var_dec()
         self._compile_subroutine_dec()
-        self._compile_expected_token(JackSymbol.RIGHT_CURLY_BRACES)
+        self._skip_expected_token(JackSymbol.RIGHT_CURLY_BRACES)
 
     def _compile_class_var_dec_single(self):
         num_fields = 0
@@ -210,7 +210,7 @@ class CompilationEngine:
             elif next_token == JackKeyword.DO:
                 self._compile_do()
             elif next_token == JackKeyword.RETURN:
-                self._compile_return()  # TODO: implement
+                self._compile_return()
             else:
                 break
 
@@ -271,11 +271,11 @@ class CompilationEngine:
 
     def _compile_return(self):
 
-        self._compile_expected_token(JackKeyword.RETURN)
+        self._skip_expected_token(JackKeyword.RETURN)
         if self._peek_token() != JackSymbol.SEMICOLON:
             self._compile_expression()
 
-        self._compile_expected_token(JackSymbol.SEMICOLON)
+        self._skip_expected_token(JackSymbol.SEMICOLON)
 
         if self._does_current_subroutine_return_void:
             self._vm_writer.write_push(SegmentType.CONSTANT, 0)
@@ -294,7 +294,7 @@ class CompilationEngine:
             elif op_token == JackSymbol.DIV:
                 self._vm_writer.write_call('Math.divide', 2)
             else:
-                self._vm_writer.write_arithmetic(JACK_BIN_OP_TO_VM_COMMAND_MAP[op_token])
+                self._vm_writer.write_arithmetic(translate_jack_op_token_to_vm_command(op_token))
 
     def _compile_subroutine_call_term(self, initial_token):
         # Parse either one of:
@@ -335,7 +335,7 @@ class CompilationEngine:
             unary_op_token = next_token
             self._skip_token()
             self._compile_term()
-            self._vm_writer.write_arithmetic(JACK_UNARY_OP_TO_VM_COMMAND_MAP[unary_op_token])
+            self._vm_writer.write_arithmetic(translate_jack_unary_op_token_to_vm_command(unary_op_token))
         else:
             token = self._get_token()
 

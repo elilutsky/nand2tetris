@@ -18,7 +18,7 @@ def syntax_analyze(input_param):
     input_files = list(input_path.rglob('*.jack')) if input_path.is_dir() else [input_path]
 
     for input_file_path in input_files:
-        with open(input_file_path.with_suffix('.xml'), 'w') as output_file_handle:
+        with open(input_file_path.with_suffix('.vm'), 'w') as output_file_handle:
             with open(input_file_path, 'r') as input_file_handle:
                 print(f'Compiling file {input_file_path}')
                 compiler = CompilationEngine(input_file_handle, output_file_handle)

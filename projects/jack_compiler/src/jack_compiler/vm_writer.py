@@ -6,7 +6,7 @@ class VMWriter:
         self._output_file_handle = output_vm_file_handle
 
     def _write(self, value):
-        self._write(value + "\n")
+        self._output_file_handle.write(value + "\n")
 
     def write_push(self, segment_type, index):
         assert segment_type in SegmentType, f'{segment_type} invalid segment type '
