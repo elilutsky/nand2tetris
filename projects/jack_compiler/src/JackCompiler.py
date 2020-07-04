@@ -4,10 +4,10 @@ from pathlib import Path
 from jack_compiler.compilation_engine import CompilationEngine
 
 
-def syntax_analyze(input_param):
+def jack_compile(input_param):
     """
-    Executes the Jack analyzer.
-    Executes the jack parser for each .jack file specified by the input
+    Executes the Jack compiler.
+    Executes the jack compiler for each .jack file specified by the input
 
     :param input_param: either a .jack file path, or a directory containing .jack files
     """
@@ -26,8 +26,8 @@ def syntax_analyze(input_param):
 
 
 if __name__ == '__main__':
-    argsparser = argparse.ArgumentParser(description='JackAnalyzer for the Jack language.')
+    argsparser = argparse.ArgumentParser(description='JackCompiler for the Jack language.')
     argsparser.add_argument('file', metavar='FILE',
                             help='path to a .jack file or a directory of .jack files')
     args = argsparser.parse_args()
-    syntax_analyze(args.file)
+    jack_compile(args.file)
