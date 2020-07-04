@@ -53,12 +53,15 @@ class SymbolTable:
     def reset_function_scope(self):
         self._function_scope_table = dict()
 
-    def append_this(self, class_name):
+    def append_this_as_pointer(self, class_name):
         # set 'this' to represent the first entry of the POINTER segment
         self._function_scope_table['this'] = SymbolDescription(name='this',
                                                                type=class_name,
                                                                kind=_SymbolKind.POINTER,
                                                                index=0)
+
+    def append_this_as_param(self, class_name):
+        self.append_argument('this', class_name)
 
     def append_static(self, name, symbol_type):
         self._append_symbol(name, symbol_type, _SymbolKind.STATIC)

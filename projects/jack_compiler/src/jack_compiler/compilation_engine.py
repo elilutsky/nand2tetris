@@ -4,7 +4,8 @@ from .tokenizer import tokenize
 from .tokenizer.tokens import JackKeyword, JackSymbol, JackDecimal, JackString, JackIdentifier
 from .symbol_table import SymbolTable
 from .vm_writer import VMWriter
-from .jack_to_vm_maps import translate_jack_op_token_to_vm_command, translate_jack_unary_op_token_to_vm_command, VMSegmentType, VMArithmeticCommand
+from .jack_to_vm_maps import translate_jack_op_token_to_vm_command, translate_jack_unary_op_token_to_vm_command,\
+    VMSegmentType, VMArithmeticCommand
 
 
 class CompilationEngine:
@@ -120,8 +121,12 @@ class CompilationEngine:
         self._symbol_table.reset_function_scope()
         self._does_current_subroutine_return_void = False
 
-        if subroutine_type_token == JackKeyword.CONSTRUCTOR or subroutine_type_token == JackKeyword.METHOD:
-            self._symbol_table.append_this(self._jack_class_name)
+        if subroutine_type_token == JackKeyword.CONSTRUCTOR:
+            # using 'this' inside a CTOR will reference the POINTER segment
+            self._symbol_table.append_this_as_pointer(self._jack_class_name)
+        elif subroutine_type_token == JackKeyword.METHOD:
+            # using 'this' inside a method will reference the first parameter
+            self._symbol_table.append_this_as_param(self._jack_class_name)
 
         # void | type
         return_type = self._get_token()
@@ -233,20 +238,28 @@ class CompilationEngine:
         symbol_name = self._get_token().value
 
         if self._peek_token() == JackSymbol.LEFT_SQUARE_BRACES:
-
-            # TODO: implement this
-
-            # [ expression ]
             self._skip_expected_token(JackSymbol.LEFT_SQUARE_BRACES)
+
+            # compute arr + expression on stack
+            self._write_identifier_push(symbol_name)
             self._compile_expression()
+            self._vm_writer.write_arithmetic(VMArithmeticCommand.ADD)
+
             self._skip_expected_token(JackSymbol.RIGHT_SQUARE_BRACES)
+            self._skip_expected_token(JackSymbol.EQUAL)
+            self._compile_expression()
 
-        self._skip_expected_token(JackSymbol.EQUAL)
-        self._compile_expression()
+            self._vm_writer.write_pop(VMSegmentType.TEMP, 0)
+            self._vm_writer.write_pop(VMSegmentType.POINTER, 1)
+            self._vm_writer.write_push(VMSegmentType.TEMP, 0)
+            self._vm_writer.write_pop(VMSegmentType.THAT, 0)
+        else:
+            self._skip_expected_token(JackSymbol.EQUAL)
+            self._compile_expression()
+            segment_type, offset, symbol_type = self._symbol_table.resolve_symbol(symbol_name)
+            self._vm_writer.write_pop(segment_type, offset)
+
         self._skip_expected_token(JackSymbol.SEMICOLON)
-
-        segment_type, offset, symbol_type = self._symbol_table.resolve_symbol(symbol_name)
-        self._vm_writer.write_pop(segment_type, offset)
 
     def __compile_condition(self, false_label_name):
         assert self._peek_token().value in [JackKeyword.WHILE.value, JackKeyword.IF.value]
@@ -359,6 +372,35 @@ class CompilationEngine:
 
         self._vm_writer.write_call(subroutine_name, num_arguments)
 
+    def _compile_string_constant(self, string_value):
+        self._vm_writer.write_push(VMSegmentType.CONSTANT, len(string_value))
+        self._vm_writer.write_call('String.new', 1)
+        self._vm_writer.write_pop(VMSegmentType.TEMP, 0)
+
+        for i in range(len(string_value)):
+            self._vm_writer.write_push(VMSegmentType.TEMP, 0)
+            self._vm_writer.write_push(VMSegmentType.CONSTANT, ord(string_value[i]))
+            self._vm_writer.write_call('String.appendChar', 2)
+
+            # ignore return value
+            self._vm_writer.write_pop(VMSegmentType.TEMP, 1)
+
+        self._vm_writer.write_push(VMSegmentType.TEMP, 0)
+
+    def _compile_array_term(self, arr_identifier_string):
+        self._skip_expected_token(JackSymbol.LEFT_SQUARE_BRACES)
+
+        # compute arr + expression on stack
+        self._write_identifier_push(arr_identifier_string)
+        self._compile_expression()
+        self._vm_writer.write_arithmetic(VMArithmeticCommand.ADD)
+
+        # set THAT segment, and push value at address
+        self._vm_writer.write_pop(VMSegmentType.POINTER, 1)
+        self._vm_writer.write_push(VMSegmentType.THAT, 0)
+
+        self._skip_expected_token(JackSymbol.RIGHT_SQUARE_BRACES)
+
     def _compile_term(self):
         next_token = self._peek_token()
         if next_token == JackSymbol.LEFT_BRACES:
@@ -379,11 +421,7 @@ class CompilationEngine:
             # 3. foo(expressionList)
             next_token = self._peek_token()
             if next_token == JackSymbol.LEFT_SQUARE_BRACES:
-                raise NotImplementedError()
-
-                self._skip_expected_token(JackSymbol.LEFT_SQUARE_BRACES)
-                self._compile_expression()
-                self._skip_expected_token(JackSymbol.RIGHT_SQUARE_BRACES)
+                self._compile_array_term(token.value)
 
             elif next_token == JackSymbol.DOT or next_token == JackSymbol.LEFT_BRACES:
                 self._compile_subroutine_call_term(token)
@@ -392,8 +430,7 @@ class CompilationEngine:
                 if isinstance(token, JackDecimal):
                     self._vm_writer.write_push(VMSegmentType.CONSTANT, token.value)
                 elif isinstance(token, JackString):
-                    # TODO: handle creating a string
-                    raise NotImplementedError()
+                    self._compile_string_constant(token.value)
 
                 elif isinstance(token, JackKeyword):
                     if token == JackKeyword.TRUE:
@@ -405,7 +442,7 @@ class CompilationEngine:
                         assert token == JackKeyword.THIS
                         self._write_identifier_push('this')
                 else:
-                    assert isinstance(token, JackIdentifier), f'{token}.value should be an identifier'
+                    assert isinstance(token, JackIdentifier), f'{token} should be an identifier'
                     self._write_identifier_push(token.value)
 
     def _write_identifier_push(self, identifier):
